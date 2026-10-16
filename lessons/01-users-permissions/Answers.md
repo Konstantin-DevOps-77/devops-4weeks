@@ -322,6 +322,82 @@ Cлужебный пользователь не имел права входа �
 
 
 ## OPS-102. Общая папка команды
+**Симптом:**
+
+// Пробуем дописать в notes от имени lab-dev2
+su - lab-dev2 -c 'echo "from dev2" >> /srv/lab/shared/notes.txt'
+-bash: line 1: /srv/lab/shared/notes.txt: Permission denied
+
+
+**Влияние:**
+Пользователь lab-dev2 не может ничего записать в notes.txt(lab-dev1 может)
+
+**Диагностика:**
+
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# id lab-dev1
+uid=1003(lab-dev1) gid=1003(lab-dev1) groups=1003(lab-dev1),100(users),1002(lab-team)
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# id lab-dev2
+uid=1004(lab-dev2) gid=1004(lab-dev2) groups=1004(lab-dev2),100(users),1002(lab-team)
+```
+
+**Причина:**
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# ls -ld /srv/lab/shared
+drwxrwx--- 2 root lab-team 4096 Oct 16 05:48 /srv/lab/shared
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# ls -l /srv/lab/shared
+total 4
+-rw-rw-r-- 1 lab-dev1 lab-dev1 16 Oct 16 05:48 notes.txt
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# su - lab-dev1 -c umask
+0002
+
+ Каталог 770 root:lab-team, оба в группе lab-team, но notes.txt создан как -rw-rw-r-- lab-dev1 lab-dev1. Файл получил основную группу создателя (lab-dev1), а не lab-team, поэтому для lab-dev2 он «чужой» и доступен только на чтение.
+
+**Решение:**
+su - lab-dev1 -c 'echo "new file" > /srv/lab/shared/new.txt'
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# chmod g+s /srv/lab/shared
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# chgrp lab-team /srv/lab/shared/notes.txt
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# chmod g+w /srv/lab/shared/notes.txt
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# ls -ld /srv/lab/shared
+drwxrws--- 2 root lab-team 4096 Oct 16 05:48 /srv/lab/shared
+
+
+
+**Проверка и профилактика:**
+
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u lab-app /srv/lab/app/run.sh
+App started, connecting to db.internal
+
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u nobody cat /srv/lab/app/config.env
+cat: /srv/lab/app/config.env: Permission denied
+
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u nobody ls /srv/lab/app
+ls: cannot open directory '/srv/lab/app': Permission denied
+```
+
+su - lab-dev1 -c 'echo "new file" > /srv/lab/shared/new.txt'
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# ls -l /srv/lab/shared
+total 8
+-rw-rw-r-- 1 lab-dev1 lab-team  9 Oct 16 06:02 new.txt
+-rw-rw-r-- 1 lab-dev1 lab-team 16 Oct 16 05:48 notes.txt
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# su - lab-dev2 -c 'echo "dev2 to new" >> /srv/lab/shared/new.txt'
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# su - lab-dev2 -c 'echo "dev2 to old" >> /srv/lab/shared/notes.txt'
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# cat /srv/lab/shared/new.txt /srv/lab/shared/notes.txt
+new file
+dev2 to new
+notes from dev1
+dev2 to old
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u nobody ls /srv/lab/shared
+ls: cannot open directory '/srv/lab/shared': Permission denied
+
+(как не допустить повторения)
+
+Профилактика: 
+Общие рабочие каталоги всегда создавать с группой команды и setgid (2770); umask 0002 у пользователей.
+Лишние привилегии не назначаем(принцип наименьших привилегий)
+
+Общая причина:
+
+Второй пользователь группы lab-team не имел возможность записать ничего в файл, потому что при создании он наследовал группу владельца и другие пользователи были для него "чужими"
+
 
 (те же шесть пунктов: Симптом, Влияние, Диагностика, Причина, Решение, Проверка и профилактика; проверка включает новый файл, старый файл и nobody)
 
