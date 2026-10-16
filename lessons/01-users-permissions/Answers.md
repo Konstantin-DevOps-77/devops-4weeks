@@ -131,12 +131,21 @@ uid=1000(konstantin) gid=1000(konstantin) groups=1000(konstantin),27(sudo),100(u
 (содержимое /etc/sudoers.d/lab-ops)
 cat /etc/sudoers.d/lab-ops
 lab-ops ALL=(root) NOPASSWD: /usr/bin/systemctl status ssh
-```
+``
 
+root@blank-black:/srv/lab/deploy# ls -l /etc/sudoers.d/lab-ops
+-r--r----- 1 root root 59 Oct 16 06:58 /etc/sudoers.d/lab-ops
+root@blank-black:/srv/lab/deploy# sudo -l -U lab-ops
+Matching Defaults entries for lab-ops on blank-black:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
 
-```
-(ls -l файла, sudo -l -U lab-ops, visudo -c)
-```
+User lab-ops may run the following commands on blank-black:
+    (root) NOPASSWD: /usr/bin/systemctl status ssh`
+
+root@blank-black:/srv/lab/deploy# visudo -c
+/etc/sudoers: parsed OK
+/etc/sudoers.d/README: parsed OK
+/etc/sudoers.d/lab-ops: parsed OK
 
 Проверки (разрешённая и две запрещённые):
 
