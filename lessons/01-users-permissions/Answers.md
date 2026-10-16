@@ -442,7 +442,9 @@ echo "Deploy started"$
 echo "Deploy finished"$
 
 //Как не допустить повторения с Windows
-
+В VS Code: в строке состояния справа переключить CRLF → LF; в настройках files.eol = \n.
+В репозитории файл .gitattributes со строкой *.sh text eol=lf.
+На Windows-машине: git config --global core.autocrlf input
 
 (те же шесть пунктов; отдельно: первая ошибка и причина, вторая ошибка и причина, как доказал вторую причину, как не допустить повторения при работе с Windows)
 
