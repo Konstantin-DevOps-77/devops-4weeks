@@ -163,9 +163,6 @@ sudo: a password is required
 su - lab-ops -c 'sudo -n /usr/bin/cat /etc/hostname'
 sudo: a password is required
 
-```
-(команды и выводы)
-```
 
 Зачем полный путь и чем плох `NOPASSWD: ALL` (своими словами):
 
@@ -204,7 +201,7 @@ cat: /srv/lab/puzzle/a/b/c/file.txt: Permission denied
 
 chmod o+x /srv/lab/puzzle/a/b
 
-# Результат ДО исправления 
+# Результат после исправления 
  
 namei -l /srv/lab/puzzle/a/b/c/file.txt
 f: /srv/lab/puzzle/a/b/c/file.txt
@@ -220,8 +217,6 @@ drwxr-xr-x root root c
 root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u nobody cat /srv/lab/puzzle/a/b/c/file.txt
 treasure
 
-(namei -l после, результат sudo -u nobody cat после)
-```
 
 Почему права на file.txt менять не пришлось и как нашёл виновника (своими словами):
 
@@ -359,8 +354,6 @@ root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# chmod g+
 root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# ls -ld /srv/lab/shared
 drwxrws--- 2 root lab-team 4096 Oct 16 05:48 /srv/lab/shared
 
-
-
 **Проверка и профилактика:**
 
 root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# sudo -u lab-app /srv/lab/app/run.sh
@@ -398,8 +391,6 @@ ls: cannot open directory '/srv/lab/shared': Permission denied
 
 Второй пользователь группы lab-team не имел возможность записать ничего в файл, потому что при создании он наследовал группу владельца и другие пользователи были для него "чужими"
 
-
-(те же шесть пунктов: Симптом, Влияние, Диагностика, Причина, Решение, Проверка и профилактика; проверка включает новый файл, старый файл и nobody)
 
 ## OPS-103. Скрипт деплоя не запускается
 
@@ -446,18 +437,42 @@ echo "Deploy finished"$
 В репозитории файл .gitattributes со строкой *.sh text eol=lf.
 На Windows-машине: git config --global core.autocrlf input
 
-(те же шесть пунктов; отдельно: первая ошибка и причина, вторая ошибка и причина, как доказал вторую причину, как не допустить повторения при работе с Windows)
 
 ## OPS-104. Ключ не принимается
 
-(коротко: текст ошибки, причина, исправление, проверка, почему SSH так строг к правам на ключ)
+// Воспроизводим проблему
+ssh-keygen -y -f /srv/lab/keys/id_lab
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for '/srv/lab/keys/id_lab' are too open.
+It is required that your private key files are NOT accessible by others.
+This private key will be ignored.
+Load key "/srv/lab/keys/id_lab": bad permissions
+
+// Проверяем разрешения
+root@blank-black:/srv/lab/deploy# ls -l /srv/lab/keys/id_lab
+-rw-r--r-- 1 root root 419 Oct 16 06:37 /srv/lab/keys/id_lab
+
+// Назначаем разрешения
+root@blank-black:/srv/lab/deploy# chmod 600 /srv/lab/keys/id_lab
+
+// Проверка
+root@blank-black:/srv/lab/deploy# ssh-keygen -y -f /srv/lab/keys/id_lab
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICF5dhLykuYw3FFyQWzDcRiuHqD0CdTOu2/j+hr92vQj root@blank-black.ptr.network
+
+// Печатается только открытый(public) ключ, секретный не показывается.
+// Почему SSH так строг к правам на ключ
+ Если приватный ключ могут читать другие пользователи, любой из них способен подключиться как владелец. Поэтому SSH отказывается использовать ключ с правами шире 600 и тем самым защищает пользователя от его собственной ошибки(защита от дурака).
 
 # Итог
 
 ## Что было сложным
 
-(пара предложений)
+Соблюдать и проверять "лишние" привилегии. Необходимо тщательная и детальная проверка всех сервисов, даже если они с первого взгляда работают хорошо.
 
 ## Что я теперь буду делать иначе
 
-(пара предложений: какую привычку взял из урока)
+1) Соблюдать принцип наименьших привилегий.
+2) Всегда точно моделировать проблему из-под рабочего пользователя(не-root). 
+3) Внимательно отслеживать репозитории на предмет наличия ключей и других важных данных, которые могут быть скомпрометированы
