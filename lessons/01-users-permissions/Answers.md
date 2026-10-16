@@ -403,6 +403,47 @@ ls: cannot open directory '/srv/lab/shared': Permission denied
 
 ## OPS-103. Скрипт деплоя не запускается
 
+// Воспроизведение ошибки
+Переходим в каталог деплоя и пытаемся запустить скрипт
+
+root@blank-black:~/projects/devops-4weeks/lessons/01-users-permissions# cd /srv/lab/deploy
+root@blank-black:/srv/lab/deploy# ./deploy.sh
+bash: ./deploy.sh: Permission denied
+root@blank-black:/srv/lab/deploy# ls -l deploy.sh
+-rw-r--r-- 1 root root 60 Oct 16 06:22 deploy.sh
+
+Ошибка 1
+ Permission denied; у файла 644 — нет бита x(он не может выполниться)
+
+// Добавляем права
+root@blank-black:/srv/lab/deploy# chmod u+x deploy.sh
+root@blank-black:/srv/lab/deploy# ./deploy.sh
+root@blank-black:/srv/lab/deploy# ./deploy.sh
+bash: ./deploy.sh: cannot execute: required file not found
+
+// Файл на месте, но «не найден» интерпретатор: в первой строке #!/bin/bash\r, то есть Linux ищет программу с именем bash + символ возврата каретки.
+
+Ошибка 2
+// В конце видно M$
+root@blank-black:/srv/lab/deploy# file deploy.sh
+deploy.sh: Bourne-Again shell script, ASCII text executable, with CRLF line terminators
+root@blank-black:/srv/lab/deploy# cat -A deploy.sh
+#!/bin/bash^M$
+echo "Deploy started"^M$
+echo "Deploy finished"^M$
+
+// Убираем CRLF и восстанавливаем нормальную работу
+root@blank-black:/srv/lab/deploy# sed -i 's/\r$//' deploy.sh
+root@blank-black:/srv/lab/deploy# file deploy.sh
+deploy.sh: Bourne-Again shell script, ASCII text executable
+root@blank-black:/srv/lab/deploy# cat -A deploy.sh
+#!/bin/bash$
+echo "Deploy started"$
+echo "Deploy finished"$
+
+//Как не допустить повторения с Windows
+
+
 (те же шесть пунктов; отдельно: первая ошибка и причина, вторая ошибка и причина, как доказал вторую причину, как не допустить повторения при работе с Windows)
 
 ## OPS-104. Ключ не принимается
