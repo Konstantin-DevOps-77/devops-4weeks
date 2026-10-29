@@ -4,17 +4,22 @@
 
 ## Задание 1. Разведка
 
-1.1 PID моего Shell
-Команда - echo $$
-Вывод - 656326
+1. PID моего Shell, PID Родителя + команда
 
-1.2 PID Родителя + команда
+# Shell
+Команда:
+echo $$
+Вывод:
+656326
+
+# Родитель + команда 
 Команда - ps -o pid,ppid,user,cmd -p $$
 Вывод:
 PID    PPID USER     CMD
 656326  653626 root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
 
-1.3 
+2. Что за процесс с PID 1
+
 ## Задание 2. Сигналы руками
 
 (Выводы по семи шагам.)
