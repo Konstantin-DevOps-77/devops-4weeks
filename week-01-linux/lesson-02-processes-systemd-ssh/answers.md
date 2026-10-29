@@ -69,17 +69,14 @@ tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",
 
 ## Задание 2. Сигналы руками
 
+# Предварительная подготовка
 root@blank-black:~/projects# cd ~/practice/lesson2
 root@blank-black:~/practice/lesson2# nano tick.sh
 root@blank-black:~/practice/lesson2# nano stubborn.sh
-root@blank-black:~/practice/lesson2# ls -la
-total 16
-drwxr-xr-x 2 root root 4096 Oct 29 13:37 .
-drwxr-xr-x 4 root root 4096 Oct 29 10:05 ..
--rw-r--r-- 1 root root   55 Oct 29 13:37 stubborn.sh
--rw-r--r-- 1 root root  156 Oct 29 13:37 tick.sh
 root@blank-black:~/practice/lesson2# chmod +x tick.sh
 root@blank-black:~/practice/lesson2# chmod +x stubborn.sh
+
+
 root@blank-black:~/practice/lesson2# ./tick.sh > tick.log 2>&1 & 
 [1] 665877
 root@blank-black:~/practice/lesson2# echo $!
@@ -120,13 +117,6 @@ root@blank-black:~/practice/lesson2# echo $?
 143
 root@blank-black:~/practice/lesson2# ./stubborn.sh &
 [1] 667490
-root@blank-black:~/practice/lesson2# kill kill -TERM 667490.
-bash: kill: kill: arguments must be process or job IDs
-bash: kill: -TERM: arguments must be process or job IDs
-bash: kill: 667490.: arguments must be process or job IDs
-root@blank-black:~/practice/lesson2# kill kill -TERM 667490
-bash: kill: kill: arguments must be process or job IDs
-bash: kill: -TERM: arguments must be process or job IDs
 root@blank-black:~/practice/lesson2# kill -TERM 667490
 root@blank-black:~/practice/lesson2# ps -o pid,stat,cmd -p 667490
     PID STAT CMD
@@ -139,12 +129,18 @@ root@blank-black:~/practice/lesson2# echo $?
 
 (Выводы по семи шагам.)
 
-| Шаг | Сигнал | Что произошло с процессом | Код возврата |
-|---|---|---|---|
-| 4 (tick.sh) | TERM | | |
-| 5 (sleep) | TERM | | |
-| 6 (stubborn.sh) | TERM | | |
-| 7 (stubborn.sh) | KILL | | |
+|         Шаг         | Сигнал     | Что произошло с процессом      | Код возврата |
+|  1    (tick.sh)     |  START     |                                |       1      |
+|  2    (tick.sh)     |  START     |                                |       1      |
+|  3    (tick.sh)     |  START     |                                |       1      |
+|  4    (tick.sh)     | TERM       |Поймал сообщение, штатно вышел  |       0      |
+|  5    (sleep)       | TERM       |Завершен(нет обработчика)       |      143     |
+|  6    (stubborn.sh) | TERM       |Проигнорирован, сигнал жив      |      НЕТ     |
+|  7    (stubborn.sh) | KILL       |Убит ядром                      |      137     |
+
+
+Почему 143: у sleep нет обработчика, умирает от сигнала, код = 128 + 15.
+Почему 137: код 128 + 9
 
 Почему `stubborn.sh` пережил `SIGTERM`, а `SIGKILL` его убил:
 
