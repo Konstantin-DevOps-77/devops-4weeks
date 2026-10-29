@@ -69,6 +69,74 @@ tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",
 
 ## Задание 2. Сигналы руками
 
+root@blank-black:~/projects# cd ~/practice/lesson2
+root@blank-black:~/practice/lesson2# nano tick.sh
+root@blank-black:~/practice/lesson2# nano stubborn.sh
+root@blank-black:~/practice/lesson2# ls -la
+total 16
+drwxr-xr-x 2 root root 4096 Oct 29 13:37 .
+drwxr-xr-x 4 root root 4096 Oct 29 10:05 ..
+-rw-r--r-- 1 root root   55 Oct 29 13:37 stubborn.sh
+-rw-r--r-- 1 root root  156 Oct 29 13:37 tick.sh
+root@blank-black:~/practice/lesson2# chmod +x tick.sh
+root@blank-black:~/practice/lesson2# chmod +x stubborn.sh
+root@blank-black:~/practice/lesson2# ./tick.sh > tick.log 2>&1 & 
+[1] 665877
+root@blank-black:~/practice/lesson2# echo $!
+665877
+root@blank-black:~/practice/lesson2# kill -STOP 665877
+
+[1]+  Stopped                 ./tick.sh > tick.log 2>&1
+root@blank-black:~/practice/lesson2# ps -o pid,stat,cmd -p 665877
+    PID STAT CMD
+ 665877 T    /bin/bash ./tick.sh
+root@blank-black:~/practice/lesson2# tail -3 tick.log
+tick: 13:39:50
+tick: 13:39:51
+tick: 13:39:52
+root@blank-black:~/practice/lesson2# kill -CONT 665877
+root@blank-black:~/practice/lesson2# ps -o pid,stat,cmd -p 665877
+    PID STAT CMD
+ 665877 S    /bin/bash ./tick.sh
+root@blank-black:~/practice/lesson2# tail -3 tick.log
+tick: 13:41:45
+tick: 13:41:46
+tick: 13:41:47
+root@blank-black:~/practice/lesson2# kill -TERM 665877
+[1]+  Done                    ./tick.sh > tick.log 2>&1
+root@blank-black:~/practice/lesson2# wait 665877
+root@blank-black:~/practice/lesson2# echo $?
+0
+root@blank-black:~/practice/lesson2# tail -3 tick.log
+tick: 13:42:23
+tick: 13:42:24
+tick: получил TERM, завершаюсь
+root@blank-black:~/practice/lesson2# sleep 300 &
+[1] 667157
+root@blank-black:~/practice/lesson2# kill -TERM 667157
+root@blank-black:~/practice/lesson2# wait 667157
+[1]+  Terminated              sleep 300
+root@blank-black:~/practice/lesson2# echo $?
+143
+root@blank-black:~/practice/lesson2# ./stubborn.sh &
+[1] 667490
+root@blank-black:~/practice/lesson2# kill kill -TERM 667490.
+bash: kill: kill: arguments must be process or job IDs
+bash: kill: -TERM: arguments must be process or job IDs
+bash: kill: 667490.: arguments must be process or job IDs
+root@blank-black:~/practice/lesson2# kill kill -TERM 667490
+bash: kill: kill: arguments must be process or job IDs
+bash: kill: -TERM: arguments must be process or job IDs
+root@blank-black:~/practice/lesson2# kill -TERM 667490
+root@blank-black:~/practice/lesson2# ps -o pid,stat,cmd -p 667490
+    PID STAT CMD
+ 667490 S    /bin/bash ./stubborn.sh
+root@blank-black:~/practice/lesson2# kill -KILL 667490
+[1]+  Killed                  ./stubborn.sh
+root@blank-black:~/practice/lesson2# wait 667490
+root@blank-black:~/practice/lesson2# echo $?
+137
+
 (Выводы по семи шагам.)
 
 | Шаг | Сигнал | Что произошло с процессом | Код возврата |
