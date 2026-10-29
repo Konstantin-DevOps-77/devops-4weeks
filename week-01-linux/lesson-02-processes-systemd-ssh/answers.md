@@ -4,7 +4,7 @@
 
 ## Задание 1. Разведка
 
-1. PID моего Shell, PID Родителя + команда
+1. PID моего Shell, PID Родителя + команда?
 
 # Shell
 Команда:
@@ -19,11 +19,31 @@ ps -o pid,ppid,user,cmd -p $$
 PID    PPID USER     CMD
 656326  653626 root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
 
-2. Что за процесс с PID 1
+2. Что за процесс с PID 1?
 Команда:
 ps -p 1 -o comm=
 Вывод:
 systemd
+
+3. Три процесса, которые больше всего занимают память (PID, пользователь, %MEM, команда)
+Команда:
+ps -eo pid,user,pmem,comm --sort=-pmem | head -n 4
+Вывод:
+PID USER     %MEM COMMAND
+ 656127 root     11.0 MainThread
+ 653545 root      7.7 MainThread
+ 653632 root      7.0 MainThread
+
+4. Покажи uptime и nproc. Одним предложением: перегружен ли сервер?
+Команда: uptime
+Вывод:
+13:21:04 up 28 days,  3:04,  4 users,  load average: 0.44, 0.18, 0.05
+Команда: nproc
+Вывод:
+1
+
+Заключение по задаче:
+Все значения меньше 1 -> сервер НЕ нагружен.
 
 
 
