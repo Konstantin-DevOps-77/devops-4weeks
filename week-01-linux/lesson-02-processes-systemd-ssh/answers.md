@@ -69,17 +69,14 @@ tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",
 
 ## Задание 2. Сигналы руками
 
+# Предварительная подготовка
 root@blank-black:~/projects# cd ~/practice/lesson2
 root@blank-black:~/practice/lesson2# nano tick.sh
 root@blank-black:~/practice/lesson2# nano stubborn.sh
-root@blank-black:~/practice/lesson2# ls -la
-total 16
-drwxr-xr-x 2 root root 4096 Oct 29 13:37 .
-drwxr-xr-x 4 root root 4096 Oct 29 10:05 ..
--rw-r--r-- 1 root root   55 Oct 29 13:37 stubborn.sh
--rw-r--r-- 1 root root  156 Oct 29 13:37 tick.sh
 root@blank-black:~/practice/lesson2# chmod +x tick.sh
 root@blank-black:~/practice/lesson2# chmod +x stubborn.sh
+
+
 root@blank-black:~/practice/lesson2# ./tick.sh > tick.log 2>&1 & 
 [1] 665877
 root@blank-black:~/practice/lesson2# echo $!
@@ -139,8 +136,9 @@ root@blank-black:~/practice/lesson2# echo $?
 
 (Выводы по семи шагам.)
 
-| Шаг | Сигнал | Что произошло с процессом | Код возврата |
-|---|---|---|---|
+| Шаг | Сигнал     | Что произошло с процессом | Код возврата |
+|  1  | (tick.sh)  |  START                    |       1      |
+|  1  | (tick.sh)  |  START                    |       1      |
 | 4 (tick.sh) | TERM | | |
 | 5 (sleep) | TERM | | |
 | 6 (stubborn.sh) | TERM | | |
