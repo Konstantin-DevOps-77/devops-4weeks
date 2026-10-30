@@ -181,7 +181,42 @@ WantedBy=multi-user.target              	автозапуск в обычном 
 
 Выводы шагов 1-6:
 
+Шаг 1.
+Команда - systemctl status lab-hello
+Вывод:
+service
+     Loaded: loaded (/etc/systemd/system/lab-hello.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-10-30 07:29:33 UTC; 21s ago
+
+Шаг 2.
+Команда - journalctl -u lab-hello -f
+Вывод:
+Oct 30 07:42:18 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:18
+Oct 30 07:42:23 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:23
+Oct 30 07:42:28 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:28
+Oct 30 07:42:33 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:33
+Oct 30 07:42:38 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:38
+Oct 30 07:42:43 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:43
+Oct 30 07:42:48 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:48
+Oct 30 07:42:53 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:53
+Oct 30 07:42:58 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:42:58
+Oct 30 07:43:03 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:43:03
+Oct 30 07:43:08 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:43:08
+Oct 30 07:43:13 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жив, 07:43:13
 (команды и вывод)
+
+Шаг 3.
+Команда - systemctl show -p MainPID --value lab-hello
+Вывод:
+686294
+
+Команда - sudo kill -9 686294
+Команда - systemctl status lab-hello
+Вывод(получен новый PID - 688864, был - 686294):
+lab-hello.service - Lab hello service
+     Loaded: loaded (/etc/systemd/system/lab-hello.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-10-30 08:24:07 UTC; 37s ago
+   Main PID: 688864 (lab-hello.sh)
 
 Разница между `kill -9` и `systemctl stop`:
 
