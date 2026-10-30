@@ -147,8 +147,19 @@ root@blank-black:~/practice/lesson2# echo $?
 Unit-файл:
 
 ```ini
+[Unit]
+Description=Lab hello service
+After=network.target
 
+[Service]
+Type=simple
+User=lab-svc
+ExecStart=/usr/local/bin/lab-hello.sh
+Restart=on-failure
+RestartSec=3
 
+[Install]
+WantedBy=multi-user.target
 ```
 
 Объяснение строк:
