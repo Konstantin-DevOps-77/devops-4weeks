@@ -227,18 +227,18 @@ lab-hello.service - Lab hello service
 
 ## Задание 4. Кто стучится на сервер
 
-sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep -c "Invalid user"
-Вывод: 4863
-
-Топ 5 логинов
-sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep "Invalid user" | awk '{print $8}' | sort | uniq -c | sort -rn | head -5
-
-Вывод:
-446 admin  
-345 ubuntu    
-226 user  
-185 debian  
-107 deploy  
+sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep -c "Invalid user"  
+Вывод: 4863  
+  
+Топ 5 логинов  
+sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep "Invalid user" | awk '{print $8}' | sort | uniq -c | sort -rn | head -5  
+  
+Вывод:  
+446 admin    
+345 ubuntu      
+226 user    
+185 debian    
+107 deploy    
 
 
 ## Задание 5. Вход по ключу
