@@ -19,8 +19,8 @@ ps -o pid,ppid,user,cmd -p $$
 PID    PPID USER     CMD
 656326  653626 root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
 
-2. Что за процесс с PID 1?
-Команда:
+2. Что за процесс с PID 1?  
+Команда: 
 ps -p 1 -o comm=
 Вывод:
 systemd
