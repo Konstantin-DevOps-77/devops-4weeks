@@ -316,8 +316,39 @@ report 09:25:23
 ## OPS-202. Сервер тормозит
 
 **Симптом:**
-**Влияние:**
-**Диагностика:**
+Высокая нагрузка на CPU
+**Влияние:**  
+Сайт отвечает медленно
+**Диагностика:**  
+top 
+ PID    PPID USER     %CPU CMD
+ 698809       1 lab-cru+ 25.0 /bin/bash /opt/lab-cruncher/crunch.sh
+ 685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...
+
+ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5  
+
+systemctl status 698809               # к какой службе относится процесс  
+systemctl cat lab-cruncher           # смотри Restart= и CPUQuota=
+root@blank-black:~/projects# systemctl cat lab-cruncher
+# /etc/systemd/system/lab-cruncher.service
+[Unit]
+Description=Lab nightly cruncher
+
+[Service]
+User=lab-crunch
+ExecStart=/opt/lab-cruncher/crunch.sh
+Restart=always
+RestartSec=1
+CPUQuota=25%
+
+[Install]
+WantedBy=multi-user.target
+
+kill 698809                           # (без -9)
+ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
+ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3 
+    PID USER     %CPU CMD
+ 699692 lab-cru+ 25.1 /bin/bash /opt/lab-cruncher/crunch.sh     # PID поменялся?
 **Причина:**  
 
 **Решение:**
