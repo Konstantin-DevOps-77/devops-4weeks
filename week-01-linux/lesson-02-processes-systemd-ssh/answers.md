@@ -206,7 +206,8 @@ Oct 30 07:43:13 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жи
 (команды и вывод)
 
 **Шаг 3.**  
-Команда - systemctl show -p MainPID --value lab-hello  
+Команда:
+ ```systemctl show -p MainPID --value lab-hello```  
 Вывод:
 686294
 
