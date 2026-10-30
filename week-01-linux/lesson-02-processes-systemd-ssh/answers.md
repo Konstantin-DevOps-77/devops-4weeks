@@ -259,7 +259,18 @@ lab-hello.service - Lab hello service
 `systemctl status lab-report`  
 `journalctl -u lab-report -n 30 --no-pager`  
 **Причина:**
+1. status=217/USER: пользователя lab-report не существует
+2. status=203/EXEC: у /opt/lab-report/report.sh права 644, нет бита x.
+3. status=1/FAILURE и в журнале ERROR: в /var/lib/lab-report/report.txt: каталога нет.
+
 **Решение:**
+1. Добавляем требуемого пользователя
+`sudo adduser --system --group --no-create-home --quiet lab-report`
+2. Добавляем бит x в права  
+`sudo chmod 755 /opt/lab-report/report.sh`  
+3. Решаем вопрос с каталогом и записью в него
+`sudo mkdir -p /var/lib/lab-report && sudo chown lab-report:lab-report /var/lib/lab-report`  
+
 **Проверка и профилактика:**
 
 ## OPS-202. Сервер тормозит
@@ -267,8 +278,13 @@ lab-hello.service - Lab hello service
 **Симптом:**
 **Влияние:**
 **Диагностика:**
-**Причина:**
+**Причина:**  
+1. status=217/USER: пользователя lab-report не существует
+2. status=203/EXEC: у /opt/lab-report/report.sh права 644, нет бита x.
+3. status=1/FAILURE и в журнале ERROR: в /var/lib/lab-report/report.txt: каталога нет.
 **Решение:**
+1. Добавляем требуемого пользователя
+`sudo adduser --system --group --no-create-home --quiet lab-report`
 **Проверка и профилактика:**
 
 ## OPS-203. Служба долго не останавливается
