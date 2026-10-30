@@ -278,11 +278,11 @@ lab-hello.service - Lab hello service
 `sudo mkdir -p /var/lib/lab-report && sudo chown lab-report:lab-report /var/lib/lab-report`  
 
 **Проверка**
-systemctl is-active lab-report
-active
-
-systemctl is-enabled lab-report
-enabled
+systemctl is-active lab-report  
+active  
+  
+systemctl is-enabled lab-report  
+enabled  
 
 ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-report)
 USER         PID CMD
