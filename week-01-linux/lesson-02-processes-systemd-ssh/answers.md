@@ -251,9 +251,11 @@ lab-hello.service - Lab hello service
 ## OPS-201. Служба отчётов не стартует
 
 **Симптом:**  
-Служба отчетов не запускается  
+Служба отчетов не запускается 
+
 **Влияние:**  
 Нет данных для отчетов  
+
 **Диагностика:**  
 `sudo systemctl start lab-report`  
 `systemctl status lab-report`  
@@ -279,12 +281,10 @@ lab-hello.service - Lab hello service
 **Влияние:**
 **Диагностика:**
 **Причина:**  
-1. status=217/USER: пользователя lab-report не существует
-2. status=203/EXEC: у /opt/lab-report/report.sh права 644, нет бита x.
-3. status=1/FAILURE и в журнале ERROR: в /var/lib/lab-report/report.txt: каталога нет.
+
 **Решение:**
-1. Добавляем требуемого пользователя
-`sudo adduser --system --group --no-create-home --quiet lab-report`
+Добавляем требуемого пользователя
+
 **Проверка и профилактика:**
 
 ## OPS-203. Служба долго не останавливается
