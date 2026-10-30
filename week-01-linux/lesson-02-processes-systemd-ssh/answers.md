@@ -357,8 +357,8 @@ ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
 **Решение:**
 sudo systemctl disable --now lab-cruncher
 
-**Проверка**
-systemctl is-active lab-cruncher  
+**Проверка**  
+systemctl is-active lab-cruncher    
 inactive.  
 systemctl is-enabled lab-cruncher  
 disabled  
