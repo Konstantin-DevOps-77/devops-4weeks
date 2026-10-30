@@ -309,7 +309,7 @@ report 09:25:18
 report 09:25:23  
 
 **Профилактика:**  
-1. gеред деплоем проверять запуск вручную: sudo -u lab-report /opt/lab-report/report.sh  
+1. Перед деплоем проверять запуск вручную: sudo -u lab-report /opt/lab-report/report.sh.    
 2. В процесс выкатки добавить проверку systemctl is-active.   
 3. Не используем root и максимальные права(принцип наименьших привилегий): chmod 777 и User=root.  
 
