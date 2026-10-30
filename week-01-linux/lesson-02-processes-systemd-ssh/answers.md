@@ -277,7 +277,7 @@ lab-hello.service - Lab hello service
 3. Решаем вопрос с каталогом и записью в него:  
 `sudo mkdir -p /var/lib/lab-report && sudo chown lab-report:lab-report /var/lib/lab-report`  
 
-**Проверка**
+**Проверка**  
 systemctl is-active lab-report  
 active  
   
