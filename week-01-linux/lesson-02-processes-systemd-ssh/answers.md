@@ -407,19 +407,95 @@ root@blank-black:~/projects# uptime
 **Симптом:**  
 **Влияние:**  
 **Диагностика:**  
-**Причина:**  
-**Решение:**  
-**Проверка и профилактика:**  
+`time sudo systemctl stop lab-worker`
+real    0m20.242s
+user    0m0.004s
+sys     0m0.008s  
 
+`systemctl status lab-worker`  
+
+
+   loaded (/etc/systemd/system/lab-worker.service; disabled; preset: enabled)
+     Active: failed (Result: timeout) since Fri 2026-10-30 14:36:01 UTC; 1min 19s ago
+   Duration: 21.344s
+    Process: 723982 ExecStart=/opt/lab-worker/worker.sh (code=killed, signal=KILL)
+   Main PID: 723982 (code=killed, signal=KILL)
+        CPU: 5ms  
+
+**Причина:**  
+Причина: в скрипте trap '' TERM HUP игнорирует TERM, как stubborn.sh; systemd ждёт таймаут и добивает KILL. Тот же приём (игнор) наследуют и дочерние процессы, в том числе длинный sleep 60. Из-за KILL «последняя пачка данных» не сохраняется.
+**Решение:**  
+Надо исправить скрипт(проблема в нем)
+bash
+#!/bin/bash
+trap 'echo "worker: получил TERM, сохраняю и завершаюсь"; exit 0' TERM
+echo "worker: старт"
+while true; do
+  echo "worker: обрабатываю пачку"
+  sleep 60 &
+  wait $!
+done
+
+**Проверка и профилактика:**  
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# sudo systemctl start lab-worker
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# time sudo systemctl stop lab-worker
+
+real    0m0.030s
+user    0m0.002s
+sys     0m0.007s
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# journalctl -u lab-worker -n 10
+
+
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: старт
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
+Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.
+
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
+Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.
+Про HUP: SIGHUP приходит при закрытии терминала. У службы под systemd терминала нет, поэтому игнорировать HUP не нужно;
 ## OPS-204. Ключ не принимается
 
 **Симптом:**  
 
 **Влияние:**    
-**Диагностика:**    
+**Диагностика:** 
+time sudo systemctl stop lab-worker
+real    0m20.242s
+user    0m0.004s
+sys     0m0.008s  
+
+systemctl status lab-worker  
+
+
+   loaded (/etc/systemd/system/lab-worker.service; disabled; preset: enabled)
+     Active: failed (Result: timeout) since Fri 2026-10-30 14:36:01 UTC; 1min 19s ago
+   Duration: 21.344s
+    Process: 723982 ExecStart=/opt/lab-worker/worker.sh (code=killed, signal=KILL)
+   Main PID: 723982 (code=killed, signal=KILL)
+        CPU: 5ms  
+
+
+
+  
+        tarted lab-worker.service - Lab batch worker.
+Oct 30 14:35:19 blank-black.ptr.network worker.sh[723982]: worker: старт
+Oct 30 14:35:19 blank-black.ptr.network worker.sh[723982]: worker: обрабатываю пачку
+Oct 30 14:35:40 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
+Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: State 'stop-sigterm' timed out. Killing.
+Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Killing process 723982 (worker.sh) with signal SIGKILL.
+Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Killing process 723984 (sleep) with signal SIGKILL.
+Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Main process exited, code=killed, status=9/KILL
+Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Failed with result 'timeout'.
 **Причина:**    
 **Решение:**    
-**Проверка и профилактика:**    
+**Проверка и профилактика:**  
+
 
 # Итог
 
