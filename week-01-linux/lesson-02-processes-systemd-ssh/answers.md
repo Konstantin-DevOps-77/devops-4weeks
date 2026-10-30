@@ -284,33 +284,33 @@ active
 systemctl is-enabled lab-report  
 enabled  
 
-ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-report)
-USER         PID CMD
-lab-rep+  694482 /bin/bash /opt/lab-report/report.sh
-
-sudo tail /var/lib/lab-report/report.txt
-(Видно, что файл растет, немного подождал)
-report 09:24:27
-report 09:24:32
-report 09:24:37
-report 09:24:42
-report 09:24:47
-report 09:24:52
-report 09:24:57
-report 09:25:02
-report 09:25:07
-report 09:25:12
-root@blank-black:~/projects# sudo tail /var/lib/lab-report/report.txt
-report 09:24:37
-report 09:24:42
-report 09:24:47
-report 09:24:52
-report 09:24:57
-report 09:25:02
-report 09:25:07
-report 09:25:12
-report 09:25:18
-report 09:25:23
+ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-report)  
+USER         PID CMD  
+lab-rep+  694482 /bin/bash /opt/lab-report/report.sh  
+  
+sudo tail /var/lib/lab-report/report.txt  
+(Видно, что файл растет, немного подождал)  
+report 09:24:27  
+report 09:24:32  
+report 09:24:37  
+report 09:24:42  
+report 09:24:47  
+report 09:24:52  
+report 09:24:57  
+report 09:25:02  
+report 09:25:07  
+report 09:25:12  
+root@blank-black:~/projects# sudo tail /var/lib/lab-report/report.txt  
+report 09:24:37  
+report 09:24:42  
+report 09:24:47  
+report 09:24:52  
+report 09:24:57  
+report 09:25:02  
+report 09:25:07  
+report 09:25:12  
+report 09:25:18  
+report 09:25:23  
 
 **Профилактика:**
 перед деплоем проверять запуск вручную: sudo -u lab-report /opt/lab-report/report.sh  
