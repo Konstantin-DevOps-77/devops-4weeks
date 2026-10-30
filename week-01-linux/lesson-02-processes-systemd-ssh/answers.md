@@ -270,7 +270,7 @@ lab-hello.service - Lab hello service
 3. status=1/FAILURE и в журнале ERROR: в /var/lib/lab-report/report.txt: каталога нет.
 
 **Решение:**
-1. Добавляем требуемого пользователя
+1. Добавляем требуемого пользователя  
 `sudo adduser --system --group --no-create-home --quiet lab-report`
 2. Добавляем бит x в права  
 `sudo chmod 755 /opt/lab-report/report.sh`  
