@@ -296,10 +296,6 @@ report 09:24:37
 report 09:24:42  
 report 09:24:47  
 report 09:24:52  
-report 09:24:57  
-report 09:25:02  
-report 09:25:07  
-report 09:25:12  
 root@blank-black:~/projects# sudo tail /var/lib/lab-report/report.txt  
 report 09:24:37  
 report 09:24:42  
