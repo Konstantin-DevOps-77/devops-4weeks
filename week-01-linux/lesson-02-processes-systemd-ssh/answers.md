@@ -262,6 +262,57 @@ root
 
 (Вывод `sshd -T` до и после, проверки входа, объяснение про `10-hardening.conf`.)
 
+Вывод sshd-T ДО
+
+root@blank-black:/etc/ssh/sshd_config.d# sudo sshd -T | grep -Ei "permitrootlogin|passwordauthentication".
+permitrootlogin yes
+passwordauthentication yes
+
+
+permitrootlogin no
+passwordauthentication no
+authenticationmethods publickey
+
+
+PS C:\Users\Admin> ssh myvps
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-142-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Fri Oct 30 04:16:14 PM UTC 2026
+
+  System load:  0.0                Processes:               156
+  Usage of /:   38.1% of 29.44GB   Users logged in:         1
+  Memory usage: 65%                IPv4 address for enp0s3: 212.113.116.203
+  Swap usage:   0%                 IPv6 address for enp0s3: 2a0b:4140:4f45::2
+
+ * Canonical Workshop gives developers fast, composable, reproducible, and
+   secure developer environments that are perfect for agentic workflows.
+
+   https://ubuntu.com/workshop
+
+Expanded Security Maintenance for Applications is not enabled.
+
+91 updates can be applied immediately.
+70 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Fri Oct 30 16:10:27 2026 from 79.137.202.82
+kostya@blank-black:~$
+
+PS C:\Users\Admin> ssh root@212.113.116.203
+root@212.113.116.203: Permission denied (publickey).
+PS C:\Users\Admin>
+
 ## Задание 7. Своими словами
 
 1. `kill -9` vs `systemctl stop`  
@@ -461,7 +512,7 @@ Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service -
 Про HUP: SIGHUP приходит при закрытии терминала. У службы под systemd терминала нет, поэтому игнорировать HUP не нужно;
 ## OPS-204. Ключ не принимается
 
-**Симптом:**    
+**Симптом:**  
 **Влияние:**    
 **Диагностика:**   
 **Причина:**    
