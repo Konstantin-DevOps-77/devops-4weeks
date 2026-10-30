@@ -209,7 +209,7 @@ Oct 30 07:43:13 blank-black.ptr.network lab-hello.sh[686294]: lab-hello: я жи
 Команда:
  ```systemctl show -p MainPID --value lab-hello```  
 Вывод:
-686294
+*686294*
 
 Команда - sudo kill -9 686294
 Команда - systemctl status lab-hello
