@@ -246,6 +246,17 @@ sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep "Invalid user" |
 ## Задание 5. Вход по ключу
 
 (Отпечаток ключа, права, `whoami`, `id`, `sudo whoami`. БЕЗ приватного ключа.)
+Отпечаток ключа:  
+256 SHA256:TV+I7mllHrCLkY7SuNMMBXkVcFU56iiC/V5b1YaaKHA kostya-laptop (ED25519)  
+
+Права  
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# ls -ld ~/.ssh  
+drwx------ 2 root root 4096 Oct 30 13:40 /root/.ssh  
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# ls -l ~/.ssh/authorized_keys  
+-rw------- 1 root root 95 Oct 30 13:40 /root/.ssh/authorized_keys  
+
+whoami  
+root
 
 ## Задание 6. Закрываем root и пароль
 
