@@ -465,38 +465,7 @@ Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service -
 
 **Влияние:**    
 **Диагностика:** 
-time sudo systemctl stop lab-worker
-real    0m20.242s
-user    0m0.004s
-sys     0m0.008s  
-
-systemctl status lab-worker  
-
-
-   loaded (/etc/systemd/system/lab-worker.service; disabled; preset: enabled)
-     Active: failed (Result: timeout) since Fri 2026-10-30 14:36:01 UTC; 1min 19s ago
-   Duration: 21.344s
-    Process: 723982 ExecStart=/opt/lab-worker/worker.sh (code=killed, signal=KILL)
-   Main PID: 723982 (code=killed, signal=KILL)
-        CPU: 5ms  
-
-
-
   
-        tarted lab-worker.service - Lab batch worker.
-Oct 30 14:35:19 blank-black.ptr.network worker.sh[723982]: worker: старт
-Oct 30 14:35:19 blank-black.ptr.network worker.sh[723982]: worker: обрабатываю пачку
-Oct 30 14:35:40 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
-Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: State 'stop-sigterm' timed out. Killing.
-Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Killing process 723982 (worker.sh) with signal SIGKILL.
-Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Killing process 723984 (sleep) with signal SIGKILL.
-Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Main process exited, code=killed, status=9/KILL
-Oct 30 14:36:01 blank-black.ptr.network systemd[1]: lab-worker.service: Failed with result 'timeout'.
-**Причина:**    
-**Решение:**    
-**Проверка и профилактика:**  
-
-
 # Итог
 
 ## Что было сложным
