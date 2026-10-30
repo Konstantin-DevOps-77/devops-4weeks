@@ -219,7 +219,7 @@ lab-hello.service - Lab hello service
      Active: active (running) since Fri 2026-10-30 08:24:07 UTC; 37s ago
    Main PID: 688864 (lab-hello.sh)
 
-***Разница между `kill -9` и `systemctl stop`:***      
+**Разница между `kill -9` и `systemctl stop`:**      
 `kill -9` извне, означает, что процесс «упал» (убит сигналом), поэтому Restart=on-failure это считает сбоем и перезапускает.  
  `systemctl stop` означает, что администратор сам приказал остановиться, systemd понимает это и перезапуск не включает.
 
