@@ -14,10 +14,10 @@
 
 **Родитель + команда:**    
 Команда:   
-ps -o pid,ppid,user,cmd -p $$  
+`ps -o pid,ppid,user,cmd -p $$`    
 Вывод:  
-PID    PPID USER     CMD  
-656326  653626 root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
+PID      PPID    USER     CMD  
+656326   653626  root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
 
 2. Что за процесс с PID 1?  
 Команда: 
