@@ -514,9 +514,19 @@ Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service -
 
 **Симптом:**  
 **Влияние:**    
-**Диагностика:**   
-**Причина:**    
-**Решение:**  
+**Диагностика:**  
+Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: bad ownership or modes for file /home/lab-key
+**Причина:**  
+Причина: chmod -R 777 открыл запись всем.  
+**Решение:** 
+
+
+ssh -i /srv/lab/ops204/key lab-key@localhost 'echo ok'
+ok
+ls -ld /home/lab-key /home/lab-key/.ssh /home/lab-key/.ssh/authorized_keys 
+drwxr-xr-x 4 lab-key lab-key 4096 Oct 31 07:09 /home/lab-key  
+drwx------ 2 lab-key lab-key 4096 Oct 30 14:08 /home/lab-key/.ssh  
+-rw------- 1 lab-key lab-key  110 Oct 31 07:00 /home/lab-key/.ssh/authorized_keys  
 **Профилактика**  
 sshd с включённым StrictModes не доверяет ключам, которые мог подменить любой другой пользователь системы: иначе ключ в authorized_keys мог бы дописать кто угодно и получить вход.
 
