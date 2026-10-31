@@ -520,11 +520,11 @@ Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: ba
 Причина: chmod -R 777 открыл запись всем.  
 **Решение:** 
 
-Корректируем права доступа, убираем "лишнее"
-chmod 755 /home/lab-key
-chmod 700 /home/lab-key/.ssh
-chmod 600 /home/lab-key/.ssh/authorized_keys
-chown -R lab-key:lab-key /home/lab-key
+Корректируем права доступа, убираем "лишнее"  
+`chmod 755 /home/lab-key`  
+`chmod 700 /home/lab-key/.ssh`  
+`chmod 600 /home/lab-key/.ssh/authorized_keys`  
+`chown -R lab-key:lab-key /home/lab-key`  
 
 ssh -i /srv/lab/ops204/key lab-key@localhost 'echo ok'
 ok
