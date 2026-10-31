@@ -25,14 +25,14 @@ PID      PPID    USER     CMD
 Вывод:  
 systemd  
 
-3. Три процесса, которые больше всего занимают память (PID, пользователь, %MEM, команда)
-Команда:
-ps -eo pid,user,pmem,comm --sort=-pmem | head -n 4
-Вывод:
-PID USER     %MEM COMMAND
- 656127 root     11.0 MainThread
- 653545 root      7.7 MainThread
- 653632 root      7.0 MainThread
+3. Три процесса, которые больше всего занимают память (PID, пользователь, %MEM, команда)  
+Команда:  
+`ps -eo pid,user,pmem,comm --sort=-pmem | head -n 4`
+Вывод:  
+PID      USER         %MEM     COMMAND  
+ 656127   root       11.0     MainThread  
+ 653545   root        7.7     MainThread  
+ 653632   root        7.0     MainThread  
 
 4. Покажи uptime и nproc. Одним предложением: перегружен ли сервер?
 Команда:
