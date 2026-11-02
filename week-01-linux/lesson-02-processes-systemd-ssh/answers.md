@@ -215,7 +215,19 @@ lab-hello.service - Lab hello service
  `systemctl stop` означает, что администратор сам приказал остановиться, systemd понимает это и перезапуск не включает.
 
 **Шаг 4.**
+`sudo systemctl stop lab-hello`
+`sleep 10`
+`systemctl is-active lab-hello`
+inactive
 
+**Шаг 5.**  
+Команды:
+`sudo systemctl start lab-hello`  
+`ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-hello)` 
+
+**Шаг 6.**  
+`systemctl is-enabled lab-hello`
+enabled
 ## Задание 4. Кто стучится на сервер
 
 sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep -c "Invalid user"  
