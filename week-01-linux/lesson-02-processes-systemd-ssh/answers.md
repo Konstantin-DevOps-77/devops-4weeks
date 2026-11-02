@@ -407,7 +407,7 @@ ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
 1. В скрипте бесконечный пустой цикл, который ничего не делает.  
 2. lab-crunch, ~25% CPU (ограничено CPUQuota=25%). Запущен службой lab-cruncher.service    
 3. kill PID отправляет TERM, процесс умирает, но в unit стоит Restart=always и RestartSec=1:  
-   через секунду systemd поднимает его снова, PID новый. Вот почему «оно возврашается».  
+через секунду systemd поднимает его снова, PID новый. Вот почему «оно возврашается».    
 **Решение:**  
 sudo systemctl disable --now lab-cruncher  
   
