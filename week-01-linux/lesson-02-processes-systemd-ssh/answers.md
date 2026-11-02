@@ -226,8 +226,8 @@ inactive
 `ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-hello)` 
 
 **Шаг 6.**  
-`systemctl is-enabled lab-hello`
-enabled
+`systemctl is-enabled lab-hello`  
+enabled  
 ## Задание 4. Кто стучится на сервер
 
 sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep -c "Invalid user"  
