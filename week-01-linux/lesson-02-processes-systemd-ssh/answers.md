@@ -157,11 +157,10 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-Объяснение строк:
-
-# Раздел Init
-Description	                               название в status
-After=network.target	                   старт после инициализации сети
+Объяснение строк:  
+# Раздел Init  
+Description	 - название в status  
+After=network.target	- старт после инициализации сети  
 
 # Раздел Service
 Type=simple         	                   главный процесс = сам скрипт
