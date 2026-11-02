@@ -379,9 +379,10 @@ report 09:25:23
  685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...    
   
 `ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5`    
-  
-`systemctl status 698809`               к какой службе относится процесс    
-`systemctl cat lab-cruncher`           # смотри Restart= и CPUQuota=  
+
+Анализируем скрипт  
+`systemctl status 698809`                  
+`systemctl cat lab-cruncher`              
 
 [Unit]
 Description=Lab nightly cruncher
