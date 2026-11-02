@@ -382,22 +382,23 @@ report 09:25:23
 
 Анализируем скрипт(уже видна проблема, что сервис быстро рестартует - "оно возвращается" и "жрет" много процессорного времени)  
 `systemctl status 698809`                  
-`systemctl cat lab-cruncher`              
-
-[Unit]
-Description=Lab nightly cruncher
-
-[Service]
-User=lab-crunch
-ExecStart=/opt/lab-cruncher/crunch.sh
-Restart=always
-RestartSec=1
-CPUQuota=25%
-
-[Install]
-WantedBy=multi-user.target
-
-kill 698809                           # (без -9)
+`systemctl cat lab-cruncher`                
+  
+[Unit]  
+Description=Lab nightly cruncher  
+  
+[Service]  
+User=lab-crunch  
+ExecStart=/opt/lab-cruncher/crunch.sh  
+Restart=always  
+RestartSec=1  
+CPUQuota=25%  
+  
+[Install]  
+WantedBy=multi-user.target  
+  
+Убиваем без 9
+`kill 698809`                           # (без -9)
 ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
 ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3 
     PID USER     %CPU CMD
