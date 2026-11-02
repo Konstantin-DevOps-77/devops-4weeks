@@ -409,7 +409,7 @@ ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
 3. kill PID отправляет TERM, процесс умирает, но в unit стоит Restart=always и RestartSec=1:  
 через секунду systemd поднимает его снова, PID новый. Вот почему «оно возврашается».    
 **Решение:**  
-sudo systemctl disable --now lab-cruncher  
+`sudo systemctl disable --now lab-cruncher`  
   
 **Проверка**    
 `systemctl is-active lab-cruncher`      
@@ -432,7 +432,8 @@ uptime/top показывают спад:
 
 ## OPS-203. Служба долго не останавливается
 
-**Симптом:**  
+**Симптом:** 
+Долго не останавливается служба 
 **Влияние:**  
 **Диагностика:**  
 `time sudo systemctl stop lab-worker`
@@ -450,43 +451,42 @@ sys     0m0.008s
    Main PID: 723982 (code=killed, signal=KILL)
         CPU: 5ms  
 
-**Причина:**  
-Причина: в скрипте trap '' TERM HUP игнорирует TERM, как stubborn.sh; systemd ждёт таймаут и добивает KILL. Тот же приём (игнор) наследуют и дочерние процессы, в том числе длинный sleep 60. Из-за KILL «последняя пачка данных» не сохраняется.
-**Решение:**  
-Надо исправить скрипт(проблема в нем)
-bash
-#!/bin/bash
-trap 'echo "worker: получил TERM, сохраняю и завершаюсь"; exit 0' TERM
-echo "worker: старт"
-while true; do
-  echo "worker: обрабатываю пачку"
-  sleep 60 &
-  wait $!
-done
+**Причина:**    
+Причина: в скрипте trap '' TERM HUP игнорирует TERM, как stubborn.sh; systemd ждёт таймаут и добивает KILL. Тот же приём (игнор) наследуют и дочерние процессы, в том числе длинный sleep 60. Из-за KILL «последняя пачка данных» не сохраняется.  
+**Решение:**    
+Надо исправить скрипт(проблема в нем)  
+bash  
+#!/bin/bash  
+trap 'echo "worker: получил TERM, сохраняю и завершаюсь"; exit 0' TERM  
+echo "worker: старт"  
+while true; do  
+  echo "worker: обрабатываю пачку"  
+  sleep 60 &  
+  wait $!  
+done  
+  
+**Проверка и профилактика:**    
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# sudo systemctl start lab-worker  
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# time sudo systemctl stop lab-worker  
+  
+real    0m0.030s  
+user    0m0.002s  
+sys     0m0.007s  
+root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# journalctl -u lab-worker -n 10  
 
-**Проверка и профилактика:**  
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# sudo systemctl start lab-worker
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# time sudo systemctl stop lab-worker
-
-real    0m0.030s
-user    0m0.002s
-sys     0m0.007s
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# journalctl -u lab-worker -n 10
-
-
-Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: старт
-Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
-Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.
-
-Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...
-Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.
-Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.
-Про HUP: SIGHUP приходит при закрытии терминала. У службы под systemd терминала нет, поэтому игнорировать HUP не нужно;
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: старт  
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...  
+Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.    
+Oct 30 14:42:31 blank-black.ptr.network worker.sh[725612]: worker: обрабатываю пачку  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopping lab-worker.service - Lab batch worker...  
+Oct 30 14:42:49 blank-black.ptr.network worker.sh[725612]: worker: получил TERM, сохраняю и завершаюсь  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: lab-worker.service: Deactivated successfully.  
+Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service - Lab batch worker.  
+Про HUP: SIGHUP приходит при закрытии терминала. У службы под systemd терминала нет, поэтому игнорировать HUP не нужно;  
+  
 ## OPS-204. Ключ не принимается
 
 **Симптом:**  
