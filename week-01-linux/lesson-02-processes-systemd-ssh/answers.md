@@ -503,9 +503,10 @@ Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: ba
 `chmod 600 /home/lab-key/.ssh/authorized_keys`  
 `chown -R lab-key:lab-key /home/lab-key`  
 
-ssh -i /srv/lab/ops204/key lab-key@localhost 'echo ok'
+**Доказательство** 
+`ssh -i /srv/lab/ops204/key lab-key@localhost 'echo ok'`
 ok
-ls -ld /home/lab-key /home/lab-key/.ssh /home/lab-key/.ssh/authorized_keys 
+`ls -ld /home/lab-key /home/lab-key/.ssh /home/lab-key/.ssh/authorized_keys` 
 drwxr-xr-x 4 lab-key lab-key 4096 Oct 31 07:09 /home/lab-key  
 drwx------ 2 lab-key lab-key 4096 Oct 30 14:08 /home/lab-key/.ssh  
 -rw------- 1 lab-key lab-key  110 Oct 31 07:00 /home/lab-key/.ssh/authorized_keys  
