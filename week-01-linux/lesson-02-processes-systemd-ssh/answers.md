@@ -65,7 +65,7 @@ tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",
 ## Задание 2. Сигналы руками
 
 # Предварительная подготовка.
-root@blank-black:~/projects# cd ~/practice/lesson2  
+`root@blank-black:~/projects# cd ~/practice/lesson2`  
 root@blank-black:~/practice/lesson2# nano tick.sh  
 root@blank-black:~/practice/lesson2# nano stubborn.sh  
 root@blank-black:~/practice/lesson2# chmod +x tick.sh  
