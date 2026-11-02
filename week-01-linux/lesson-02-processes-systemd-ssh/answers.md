@@ -4,18 +4,16 @@
 
 ## Задание 1. Разведка
 
-1. PID моего Shell, PID Родителя + команда?  
-  
-**Shell**  
-Команда:  
+1. PID моего Shell, PID Родителя + команда?    
+Shell    
+Команда:    
 `echo $$`   
 Вывод:  
 656326  
-
-**Родитель + команда:**    
-Команда:   
-`ps -o pid,ppid,user,cmd -p $$`    
-Вывод:  
+Родитель + команда:      
+Команда:     
+`ps -o pid,ppid,user,cmd -p $$`      
+Вывод:    
 PID      PPID    USER     CMD  
 656326   653626  root     /bin/bash --init-file /root/.vscode-server/cli/servers/Stable-2c.....
 
