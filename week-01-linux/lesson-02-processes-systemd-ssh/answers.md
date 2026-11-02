@@ -248,72 +248,44 @@ enabled
 
 (Отпечаток ключа, права, `whoami`, `id`, `sudo whoami`. БЕЗ приватного ключа.)
 Отпечаток ключа:  
-256 SHA256:TV+I7mllHrCLkY7SuNMMBXkVcFU56iiC/V5b1YaaKHA kostya-laptop (ED25519)  
-
-Права  
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# ls -ld ~/.ssh  
-drwx------ 2 root root 4096 Oct 30 13:40 /root/.ssh  
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# ls -l ~/.ssh/authorized_keys  
+256 SHA256:TV+I7mllHrCLkY7SuNMMBXkVcFU56iiC/V5b1YaaKHA kostya-laptop (ED25519)    
+Права    
+`ls -ld ~/.ssh`  
+drwx------ 2 root root 4096 Oct 30 13:40 /root/.ssh    
+`ls -l ~/.ssh/authorized_keys`  
 -rw------- 1 root root 95 Oct 30 13:40 /root/.ssh/authorized_keys  
 
-whoami  
+`sudo whoami`  
 root
 
-## Задание 6. Закрываем root и пароль
-
-(Вывод `sshd -T` до и после, проверки входа, объяснение про `10-hardening.conf`.)
-
+## Задание 6. Закрываем root и пароль  
+(Вывод `sshd -T` до и после, проверки входа, объяснение про `10-hardening.conf`.)  
 Вывод sshd-T ДО
+`sudo sshd -T | grep -Ei "permitrootlogin|passwordauthentication"`  
+permitrootlogin yes  
+passwordauthentication yes 
 
-root@blank-black:/etc/ssh/sshd_config.d# sudo sshd -T | grep -Ei "permitrootlogin|passwordauthentication".
-permitrootlogin yes
-passwordauthentication yes
+Вывод sshd-T После:  
 
+permitrootlogin no  
+passwordauthentication no  
+authenticationmethods publickey  
 
-permitrootlogin no
-passwordauthentication no
-authenticationmethods publickey
+PS C:\Users\Admin> ssh myvps  
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-142-generic x86_64)  
+ * Documentation:  https://help.ubuntu.com  
+ * Management:     https://landscape.canonical.com  
+ * Support:        https://ubuntu.com/pro  
+ System information as of Fri Oct 30 04:16:14 PM UTC 2026 
+  System load:  0.0                Processes:               156  
+  Usage of /:   38.1% of 29.44GB   Users logged in:         1  
+  Memory usage: 65%                IPv4 address for enp0s3: 212.113.116.203  
+  Swap usage:   0%                 IPv6 address for enp0s3: 2a0b:4140:4f45::2  
+Last login: Fri Oct 30 16:10:27 2026 from 79.137.202.82  
+kostya@blank-black:~$  
 
-
-PS C:\Users\Admin> ssh myvps
-Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-142-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/pro
-
- System information as of Fri Oct 30 04:16:14 PM UTC 2026
-
-  System load:  0.0                Processes:               156
-  Usage of /:   38.1% of 29.44GB   Users logged in:         1
-  Memory usage: 65%                IPv4 address for enp0s3: 212.113.116.203
-  Swap usage:   0%                 IPv6 address for enp0s3: 2a0b:4140:4f45::2
-
- * Canonical Workshop gives developers fast, composable, reproducible, and
-   secure developer environments that are perfect for agentic workflows.
-
-   https://ubuntu.com/workshop
-
-Expanded Security Maintenance for Applications is not enabled.
-
-91 updates can be applied immediately.
-70 of these updates are standard security updates.
-To see these additional updates run: apt list --upgradable
-
-Enable ESM Apps to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-New release '26.04.1 LTS' available.
-Run 'do-release-upgrade' to upgrade to it.
-
-
-Last login: Fri Oct 30 16:10:27 2026 from 79.137.202.82
-kostya@blank-black:~$
-
-PS C:\Users\Admin> ssh root@212.113.116.203
-root@212.113.116.203: Permission denied (publickey).
-PS C:\Users\Admin>
-
+PS C:\Users\Admin> ssh root@212.113.116.203  
+root@212.113.116.203: Permission denied (publickey).  
 ## Задание 7. Своими словами
 
 1. `kill -9` vs `systemctl stop`  
