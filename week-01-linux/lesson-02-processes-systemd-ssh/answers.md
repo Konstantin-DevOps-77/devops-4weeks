@@ -329,17 +329,17 @@ root@212.113.116.203: Permission denied (publickey).
 `sudo mkdir -p /var/lib/lab-report && sudo chown lab-report:lab-report /var/lib/lab-report`  
 
 **Проверка**  
-systemctl is-active lab-report  
+`systemctl is-active lab-report`  
 active  
   
-systemctl is-enabled lab-report  
+`systemctl is-enabled lab-report`  
 enabled  
 
-ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-report)  
+`ps -o user,pid,cmd -p $(systemctl show -p MainPID --value lab-report)`  
 USER         PID CMD  
 lab-rep+  694482 /bin/bash /opt/lab-report/report.sh  
   
-sudo tail /var/lib/lab-report/report.txt  
+`sudo tail /var/lib/lab-report/report.txt`  
 (Видно, что файл растет, немного подождал)  
 report 09:24:27  
 report 09:24:32  
@@ -347,7 +347,7 @@ report 09:24:37
 report 09:24:42  
 report 09:24:47  
 report 09:24:52  
-root@blank-black:~/projects# sudo tail /var/lib/lab-report/report.txt  
+`sudo tail /var/lib/lab-report/report.txt`  
 report 09:24:37  
 report 09:24:42  
 report 09:24:47  
@@ -366,17 +366,19 @@ report 09:25:23
 
 ## OPS-202. Сервер тормозит
 
-**Симптом:**  
-Высокая нагрузка на CPU  
+**Симптом:** 
+Высокая нагрузка на CPU      
+  
 **Влияние:**    
 Сайт отвечает медленно  
-**Диагностика:**    
-top   
- PID    PPID USER     %CPU CMD  
- 698809       1 lab-cru+ 25.0 /bin/bash /opt/lab-cruncher/crunch.sh  
- 685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...  
+    
+**Диагностика:**      
+`top`     
+ PID    PPID USER     %CPU CMD    
+ 698809       1 lab-cru+ 25.0 /bin/bash /opt/lab-cruncher/crunch.sh    
+ 685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...    
   
-ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5    
+`ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5`    
   
 systemctl status 698809               # к какой службе относится процесс    
 systemctl cat lab-cruncher           # смотри Restart= и CPUQuota=  
