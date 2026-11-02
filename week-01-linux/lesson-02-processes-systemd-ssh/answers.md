@@ -492,7 +492,7 @@ Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service -
 **Симптом:**  
 **Влияние:**    
 **Диагностика:**  
-Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: bad ownership or modes for file /home/lab-key
+Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: bad ownership or modes for file /home/lab-key  
 **Причина:**  
 Причина: chmod -R 777 открыл запись всем.  
 **Решение:** 
