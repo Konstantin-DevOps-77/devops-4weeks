@@ -227,7 +227,7 @@ inactive
 
 **Шаг 6.**  
 `systemctl is-enabled lab-hello`  
-enabled  
+enabled    
 ## Задание 4. Кто стучится на сервер
 
 sudo journalctl -u ssh --since "24 hours ago" --no-pager | grep -c "Invalid user"  
