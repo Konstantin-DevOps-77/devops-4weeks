@@ -401,28 +401,29 @@ WantedBy=multi-user.target
 `kill 698809`                           # (без -9)
 ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
 ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3 
-    PID USER     %CPU CMD
- 699692 lab-cru+ 25.1 /bin/bash /opt/lab-cruncher/crunch.sh     # PID поменялся?
-**Причина:**  
-1. В скрипте бесконечный пустой цикл, который ничего не делает.
-2. lab-crunch, ~25% CPU (ограничено CPUQuota=25%). Запущен службой lab-cruncher.service  
+    PID USER     %CPU CMD  
+ 699692 lab-cru+ 25.1 /bin/bash /opt/lab-cruncher/crunch.sh     # PID поменялся?  
+**Причина:**    
+1. В скрипте бесконечный пустой цикл, который ничего не делает.  
+2. lab-crunch, ~25% CPU (ограничено CPUQuota=25%). Запущен службой lab-cruncher.service    
 3. kill PID отправляет TERM, процесс умирает, но в unit стоит Restart=always и RestartSec=1:  
-   через секунду systemd поднимает его снова, PID новый. Вот почему «оно возврашается».
-**Решение:**
-sudo systemctl disable --now lab-cruncher
-
-**Проверка**  
-systemctl is-active lab-cruncher    
-inactive.  
-systemctl is-enabled lab-cruncher  
+   через секунду systemd поднимает его снова, PID новый. Вот почему «оно возврашается».  
+**Решение:**  
+sudo systemctl disable --now lab-cruncher  
+  
+**Проверка**    
+`systemctl is-active lab-cruncher`      
+inactive.    
+`systemctl is-enabled lab-cruncher`    
 disabled  
-uptime/top показывают спад:  
-root@blank-black:~/projects# uptime  
+      
+uptime/top показывают спад:    
+`uptime`  
  10:10:45 up 28 days, 23:53,  3 users,  load average: 0.41, 0.48, 0.22  
-root@blank-black:~/projects# uptime  
+`uptime`  
  10:10:53 up 28 days, 23:54,  3 users,  load average: 0.34, 0.46, 0.21  
-root@blank-black:~/projects# uptime  
- 10:10:59 up 28 days, 23:54,  3 users,  load average: 0.32, 0.45, 0.21  
+`uptime`    
+ 10:10:59 up 28 days, 23:54,  3 users,  load average: 0.32, 0.45, 0.21    
 
 **Профилактика**  
 1. Спросить у владельца: что делает служба, зачем нужна и в какое время. 
