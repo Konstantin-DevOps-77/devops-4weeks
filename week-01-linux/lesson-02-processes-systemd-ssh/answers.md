@@ -380,10 +380,9 @@ report 09:25:23
   
 `ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5`    
   
-systemctl status 698809               # к какой службе относится процесс    
-systemctl cat lab-cruncher           # смотри Restart= и CPUQuota=  
-root@blank-black:~/projects# systemctl cat lab-cruncher  
-#/etc/systemd/system/lab-cruncher.service
+`systemctl status 698809`               к какой службе относится процесс    
+`systemctl cat lab-cruncher`           # смотри Restart= и CPUQuota=  
+
 [Unit]
 Description=Lab nightly cruncher
 
