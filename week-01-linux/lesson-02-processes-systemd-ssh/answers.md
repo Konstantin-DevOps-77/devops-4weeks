@@ -174,9 +174,9 @@ RestartSec=3 - пауза 3 секунды (требование задания)
 WantedBy=multi-user.target - автозапуск в обычном режиме загрузки; именно эту привязку использует enable  
 
 **Выводы шагов 1-6:**    
-**Шаг 1.**
-Команда:
-`systemctl status lab-hello`
+**Шаг 1.**  
+Команда:  
+`systemctl status lab-hello`  
 Вывод:  
 service  
 Loaded: loaded (/etc/systemd/system/lab-hello.service; enabled; preset: enabled)  
