@@ -55,13 +55,12 @@ PID      USER         %MEM     COMMAND
 84 S  
 2  T  
 
-6. Какой процесс слушает порт 22 и от какого пользователя он работает?
-Команда:
-sudo ss -tulnp | grep :22
-
-Вывод:
-tcp   LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1019,fd=3),("systemd",pid=1,fd=117))    
-tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",pid=1019,fd=4),("systemd",pid=1,fd=118))
+6. Какой процесс слушает порт 22 и от какого пользователя он работает?  
+Команда:  
+`sudo ss -tulnp | grep :22`  
+Вывод:  
+tcp   LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1019,fd=3),("systemd",pid=1,fd=117))      
+tcp   LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",pid=1019,fd=4),("systemd",pid=1,fd=118))  
 
 ## Задание 2. Сигналы руками
 
