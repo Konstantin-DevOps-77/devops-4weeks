@@ -40,7 +40,8 @@ uptime
 Вывод:  
 13:21:04 up 28 days,  3:04,  4 users,  load average: 0.44, 0.18, 0.05  
   
-Команда: nproc  
+Команда:   
+`nproc`  
 Вывод:  
 1 
   
