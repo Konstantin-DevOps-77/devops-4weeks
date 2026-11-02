@@ -485,8 +485,8 @@ while true; do
 done  
 ```  
 **Проверка и профилактика:**    
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# sudo systemctl start lab-worker  
-root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# time sudo systemctl stop lab-worker  
+`sudo systemctl start lab-worker`  
+`time sudo systemctl stop lab-worker ` 
   
 real    0m0.030s  
 user    0m0.002s  
