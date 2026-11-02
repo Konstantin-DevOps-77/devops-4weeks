@@ -495,7 +495,9 @@ Oct 30 14:42:49 blank-black.ptr.network systemd[1]: Stopped lab-worker.service -
 ## OPS-204. Ключ не принимается
 
 **Симптом:**  
-**Влияние:**    
+Отказ в доступе  
+**Влияние:**   
+Проблемы с правами -> возможно, чересчур открытый доступ -> компрометация ключа.   
 **Диагностика:** 
 `ssh -i /srv/lab/ops204/key -o StrictHostKeyChecking=accept-new lab-key@localhost.` 
 Oct 31 07:01:21 blank-black.ptr.network sshd[791416]: Authentication refused: bad ownership or modes for file /home/lab-key  
