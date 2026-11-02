@@ -393,7 +393,7 @@ report 09:25:23
 `top`     
  PID    PPID USER     %CPU CMD    
  698809       1 lab-cru+ 25.0 /bin/bash /opt/lab-cruncher/crunch.sh    
- 685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...    
+ 685245  685218 root      0.9 /root/.vscode-server/cli/servers/Stable...      
   
 `ps -eo pid,ppid,user,%cpu,cmd --sort=-%cpu | head -5`    
 
@@ -415,11 +415,11 @@ CPUQuota=25%
 WantedBy=multi-user.target  
 ```    
 Убиваем без 9
-`kill 698809`                           # (без -9)
-ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3
-ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3 
+`kill 698809`                           # (без -9)  
+`ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3`  
+`ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -3`   
     PID USER     %CPU CMD  
- 699692 lab-cru+ 25.1 /bin/bash /opt/lab-cruncher/crunch.sh     # PID поменялся?  
+ 699692 lab-cru+ 25.1 /bin/bash /opt/lab-cruncher/crunch.sh     #смена PID   
 **Причина:**    
 1. В скрипте бесконечный пустой цикл, который ничего не делает.  
 2. lab-crunch, ~25% CPU (ограничено CPUQuota=25%). Запущен службой lab-cruncher.service    
