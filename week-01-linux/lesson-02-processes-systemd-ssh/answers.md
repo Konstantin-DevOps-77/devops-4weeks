@@ -473,8 +473,8 @@ sys     0m0.008s
 **Причина:**    
 Причина: в скрипте trap '' TERM HUP игнорирует TERM, как stubborn.sh; systemd ждёт таймаут и добивает KILL. Тот же приём (игнор) наследуют и дочерние процессы, в том числе длинный sleep 60. Из-за KILL «последняя пачка данных» не сохраняется.  
 **Решение:**    
-Надо исправить скрипт(проблема в нем)  
-bash  
+Надо исправить скрипт(проблема в нем)    
+```  bash    
 #!/bin/bash  
 trap 'echo "worker: получил TERM, сохраняю и завершаюсь"; exit 0' TERM  
 echo "worker: старт"  
@@ -483,7 +483,7 @@ while true; do
   sleep 60 &  
   wait $!  
 done  
-  
+```  
 **Проверка и профилактика:**    
 root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# sudo systemctl start lab-worker  
 root@blank-black:~/projects/devops-4weeks/week-01-linux/lesson-02-processes-systemd-ssh# time sudo systemctl stop lab-worker  
