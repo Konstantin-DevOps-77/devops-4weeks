@@ -166,9 +166,9 @@ After=network.target	- старт после инициализации сети
 Type=simple - главный процесс = сам скрипт  
 User=lab-svc - работаем не под root:   
 если сервис взломают, ущерб ограничен правами lab-svc(требование задания, принцип наименьших привилегий)  
-ExecStart=/usr/local/bin/lab-hello.sh	   путь запуска(полный), потому что systemd не ищет по PATH  
-Restart=on-failure	                       перезапуск после падения или убийства сигналом  
-RestartSec=3	                           пауза 3 с (требование задания)  
+ExecStart=/usr/local/bin/lab-hello.sh- путь запуска(полный), потому что systemd не ищет по PATH  
+Restart=on-failure - перезапуск после падения или убийства сигналом  
+RestartSec=3 - пауза 3 секунды (требование задания)  
 
 # Раздел Install
 WantedBy=multi-user.target              	автозапуск в обычном режиме загрузки; именно эту привязку использует enable
