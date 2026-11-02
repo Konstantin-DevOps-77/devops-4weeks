@@ -171,13 +171,12 @@ Restart=on-failure - перезапуск после падения или уб�
 RestartSec=3 - пауза 3 секунды (требование задания)  
 
 # Раздел Install
-WantedBy=multi-user.target - автозапуск в обычном режиме загрузки; именно эту привязку использует enable  
-
-**Выводы шагов 1-6:**    
-**Шаг 1.**  
-Команда:  
-`systemctl status lab-hello`  
-Вывод:  
+WantedBy=multi-user.target - автозапуск в обычном режиме загрузки; именно эту привязку использует enable    
+**Выводы шагов 1-6:**  
+**Шаг 1.**    
+Команда:    
+`systemctl status lab-hello`    
+Вывод:    
 service  
 Loaded: loaded (/etc/systemd/system/lab-hello.service; enabled; preset: enabled)  
 Active: active (running) since Fri 2026-10-30 07:29:33 UTC; 21s ago  
