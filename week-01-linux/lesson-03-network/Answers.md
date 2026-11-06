@@ -31,7 +31,7 @@ default via 10.0.0.1 dev enp0s3 onlink
 Публичный(внешний) адрес "подставляет" NAT, транслируя адреса снаружи/внутрь и наоборот.   
   
 4.  
-Команда:
+Команда:  
 `ping -c 3 8.8.8.8`  
 Вывод:   
 PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.    
@@ -39,7 +39,7 @@ PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
 64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=0.829 ms    
 64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=1.92 ms       
   
-Команда:    
+Команда:      
 `ping -c 3 github.com`    
 Вывод:      
 PING github.com (140.82.121.3) 56(84) bytes of data.    
