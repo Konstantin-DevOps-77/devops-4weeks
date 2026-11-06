@@ -273,15 +273,16 @@ Rule deleted (v6)
 `sudo ufw allow 8301/tcp`
 Rule added
 Rule added (v6)
-- **Проверка:**
-PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8081
-
-ComputerName     : 212.113.116.203
-RemoteAddress    : 212.113.116.203
-RemotePort       : 8081
-InterfaceAlias   : happ-xray
-SourceAddress    : 172.19.0.1
+- **Проверка:**  
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8081  
+  
+ComputerName     : 212.113.116.203  
+RemoteAddress    : 212.113.116.203  
+RemotePort       : 8081  
+InterfaceAlias   : happ-xray  
+SourceAddress    : 172.19.0.1  
 TcpTestSucceeded : True  
+    
 - **Профилактика:**  
 1. gри выкатке сервиса сразу проверять на адрес прослушивания; 
 2. открывать порт в фаерволе как часть процесса деплоя;
