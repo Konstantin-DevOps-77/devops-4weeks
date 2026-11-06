@@ -258,13 +258,13 @@ LISTEN 0      5          127.0.0.1:8301       0.0.0.0:*    users:(("python3",pid
 1. Служба слушает 127.0.0.1, снаружи недоступна. Поэтому внутри все ок, снаружи - нет.
 2. UFW блокирует 8301. Необходимо исправить правила.
 
-- **Решение:**  
-1. Обновляем init-файл:
-`sudo systemctl edit --full ops301-web.service` - сменим привязку --bind 127.0.0.1 на --bind 0.0.0.0  
-`sudo systemctl daemon-reload`          - перезагружаем демон после правки unit-файла
-`sudo systemctl restart ops301-web`     - рестартим сам сервис  
-`sudo ss -tlnp | grep 8301`             - теперь Listen правильный
-LISTEN 0      5            0.0.0.0:8301       0.0.0.0:*    users:(("python3",pid=1004691,fd=3))  
+- **Решение:**    
+1. Обновляем init-файл:  
+`sudo systemctl edit --full ops301-web.service` - сменим привязку --bind 127.0.0.1 на --bind 0.0.0.0    
+`sudo systemctl daemon-reload`          - перезагружаем демон после правки unit-файла  
+`sudo systemctl restart ops301-web`     - рестартим сам сервис    
+`sudo ss -tlnp | grep 8301`             - теперь Listen правильный  
+LISTEN 0      5            0.0.0.0:8301       0.0.0.0:*    users:(("python3",pid=1004691,fd=3))    
 
 2. Редактируем правила FW:  
 `sudo ufw delete deny 8301/tcp`  
