@@ -63,7 +63,29 @@ PING github.com (140.82.121.3) 56(84) bytes of data.
 
 
 
-## Задание 3. curl по шагам
+## Задание 3. curl по шагам  
+  
+1. 
+Команда:  
+`curl -v https://github.com -o /dev/null 2>&1 | head -40`  
+
+Вывод:  
+1.1 Подключились - IP - 140.82.121.3:443    
+1.2 Строка об установлении соединения - Connected to github.com (140.82.121.3) port 443  
+1.3 Версия TLS - TLSv1.3  
+1.4 Код ответа - < HTTP/2 200  
+  
+2.  
+Команда:  
+`curl -I http://github.com`  
+Вывод:
+HTTP/1.1 301 Moved Permanently  
+Content-Length: 0  
+Location: https://github.com/  
+Осуществлен принудительный перевод с незащищенного http на защищенный https.  
+  
+3. 
+
 
 ## Задание 4. DNS и /etc/hosts
 
