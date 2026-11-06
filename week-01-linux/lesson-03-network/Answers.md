@@ -174,7 +174,9 @@ getent hosts my-test.local
 dig +short my-test.local  
 ping -c 1 my-test.local  
 
-```
+```  
+Вывод:  
+getent и ping используют системный резолвер, который СНАЧАЛА смотрит /etc/hosts, и НАШЛИ запись. dig ищет только в DNS-серверах, /etc/hosts не читает, поэтому НИЧЕГО не нашёл (вывод пустой).
 
 ## Задание 5. Свой веб-сервер
 
