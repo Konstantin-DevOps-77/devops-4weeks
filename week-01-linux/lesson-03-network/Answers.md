@@ -102,7 +102,19 @@ curl: (28) Connection timed out after 5002 milliseconds
 
 Закрыто по timeout. Адрес частный и несуществующий. Пакет уходит к шлюзу и там пропадает, никто не отвечает ни отказом, ни согласием. Тишина = timeout.  
 
-5.   
+5.  
+Команда:
+`curl -v http://127.0.0.1:1`  
+Вывод:
+*   Trying 127.0.0.1:1...  
+* connect to 127.0.0.1 port 1 from 127.0.0.1 port 55894 failed: Connection refused  
+* Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server  
+* Closing connection  
+curl: (7) Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server  
+
+Это refused.
+Кратко разница -  В пункте 4 пакет вообще не нашёл адресата и ответа нет(timeout). Refused значит «до хоста дошли, порт пустой»; timeout значит «куда-то пропало по дороге».   
+
 
 ## Задание 4. DNS и /etc/hosts
 
