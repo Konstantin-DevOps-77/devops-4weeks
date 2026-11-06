@@ -91,6 +91,19 @@ Location: https://github.com/
 404  
 Код 404: сервер работает, но такой страницы нет. Это уровень приложения, сеть работает.  
 
+4. 
+Команда:  
+`curl -v -m 5 http://10.255.255.1`  
+Вывод:
+*   Trying 10.255.255.1:80...  
+* Connection timed out after 5002 milliseconds  
+* Closing connection  
+curl: (28) Connection timed out after 5002 milliseconds  
+
+Закрыто по timeout. Адрес частный и несуществующий. Пакет уходит к шлюзу и там пропадает, никто не отвечает ни отказом, ни согласием. Тишина = timeout.  
+
+5.   
+
 ## Задание 4. DNS и /etc/hosts
 
 ## Задание 5. Свой веб-сервер
