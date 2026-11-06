@@ -219,15 +219,52 @@ ufw allow 8443/tcp
 - **Симптом:**  
 Сайт на 8301 не открывается снаружи  
 - **Влияние:**  
-Сервис недоступен.    
+Внешние пользователи не могут зайти в магазин - сервис недоступен.    
 - **Диагностика:**  
 Проверяем статус сервиса:  
 `systemctl status ops301-web`
 Вывод:  
 ops301-web.service - OPS-301 shop frontend  
      Loaded: loaded (/etc/systemd/system/ops301-web.service; enabled; preset: enabled)  
-     Active: active (running)  
-  
+     Active: active (running)
+
+Команда(проверяем, какой порт на LISTEN):  
+`sudo ss -tlnp | grep 8301`  
+Вывод:
+LISTEN 0      5          127.0.0.1:8301       0.0.0.0:*    users:(("python3",pid=1003226,fd=3))  
+
+
+Команда(проверяем, что сервис жив внутри):  
+ curl -v http://127.0.0.1:8301
+*   Trying 127.0.0.1:8301...
+* Connected to 127.0.0.1 (127.0.0.1) port 8301
+> GET / HTTP/1.1
+> Host: 127.0.0.1:8301
+> User-Agent: curl/8.5.0
+> Accept: */*
+<h1>Витрина работает</h1>
+
+Команда(проверяем, что с правилами на FW)
+`sudo ufw status numbered`  
+Вывод:  
+     To                         Action      From  
+     --                         ------      ----  
+[ 1] 22/tcp                     ALLOW IN    Anywhere                    
+[ 2] 80/tcp                     ALLOW IN    Anywhere                    
+[ 3] 443/tcp                    ALLOW IN    Anywhere                  
+[ 4] 443/udp                    ALLOW IN    Anywhere                  
+[ 5] 37363/tcp                  ALLOW IN    Anywhere                  
+[ 6] 8443/tcp                   ALLOW IN    Anywhere                  
+[ 7] 8301/tcp                   DENY IN     Anywhere                  
+[ 8] 22/tcp (v6)                ALLOW IN    Anywhere (v6)               
+[ 9] 80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+[10] 443/tcp (v6)               ALLOW IN    Anywhere (v6)             
+[11] 443/udp (v6)               ALLOW IN    Anywhere (v6)             
+[12] 37363/tcp (v6)             ALLOW IN    Anywhere (v6)             
+[13] 8443/tcp (v6)              ALLOW IN    Anywhere (v6)             
+[14] 8301/tcp (v6)              DENY IN     Anywhere (v6)  
+
+
 - **Причина:**  
 - **Решение:**  
 - **Проверка:**  
