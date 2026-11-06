@@ -291,140 +291,141 @@ TcpTestSucceeded : True
 
 ## OPS-302  
 - **Симптом:**  
-Мониторинг не видит статус сервиса
+Мониторинг не видит статус сервиса  
 - **Влияние:**  
-Нет доступа - connection refused 
-- **Диагностика:**
-1. Проверяем статус сервиса:
-`systemctl status ops302-status` 
-systemctl status ops302-status
-● ops302-status.service - OPS-302 status endpoint  
-     Loaded: loaded (/etc/systemd/system/ops302-status.service; enabled; preset: enabled)  
-     Active: active (running)  
-2. Проверяем Listen:
-`sudo ss -tlnp | grep 8302`  
-LISTEN 0      5          127.0.0.1:8302       0.0.0.0:*    users:(("python3",pid=1005772,fd=3))  
-3. Смотрим curl на порту:
-`curl -v http://status.ops.lab:8302/`
-* connect to 127.0.0.2 port 8302 from 127.0.0.1 port 38418 failed: Connection refused  
-4. Проверям куда идет приложение:
-`getent hosts status.ops.lab`  
-127.0.0.2       status.ops.lab  
-5. Проверям dig
-`dig +short status.ops.lab`  
-Пусто - dig не читает /etc/hosts
-6. Смотрим, что в etc/hosts
-`grep status /etc/hosts`  
-# status endpoint, перенесли при переезде  
-127.0.0.2 status.ops.lab  
-- **Причина:**  
-запись в /etc/hosts указывает имя на 127.0.0.2, а служба слушает только 127.0.0.1.   
-Весь диапазон 127.0.0.0/8 это loopback, но слушатель привязан именно к 127.0.0.1, так что на 127.0.0.2 никого нет → поэтому refused.  
-- **Решение:** 
-Меняем запись:
-``` 
-sudo cp /etc/hosts /etc/hosts.ops302.bak
-sudo sed -i 's/^127\.0\.0\.2 status\.ops\.lab/127.0.0.1 status.ops.lab/' /etc/hosts
-getent hosts status.ops.lab                  # 127.0.0.1
-``` 
-127.0.0.1       status.ops.lab
-- **Проверка:**  
-`curl http://status.ops.lab:8302`
-{"status":"ok"}
-- **Профилактика:**  
-1. Не держать «временные» записи в /etc/hosts без комментария и владельца; заводить имена в DNS или конфигурации-как-коде; 
-2. В мониторинге проверять и имя, и адрес; 
-3. всегда начинать с curl -v  
-4. Обязательно документировать ВСЕ переезды(временные/постоянные)
-
-- **В чём ошибся Сергей:**  
-1. dig ничего не нашёл → «в DNS имени нет, значит, не DNS». Это неправильный вывод: dig не читает /etc/hosts, а curl читает. Нужно было getent hosts.  
-2. active (running) → «сервис в порядке». Это всего лишь означает, что процесс жив. Но при этом он слушает другой адрес, чем тот, куда идёт клиент.  
-3. «Наверное, висит, перезапусти». Это догадка, а не диагностика. Достаточно было curl -v: в нём сразу видно, какой IP пробует curl  
-
-## OPS-303
-- **Симптом:**  
-Служба API не стартует после релиза
-- **Влияние:**  
-Новая версия запускается, но через пару секунд падает в failed.  
+Нет доступа - connection refused   
 - **Диагностика:**  
-1. Проверяем статус службы"
-`systemctl status ops303-api` 
-ops303-api.service - OPS-303 API v2  
+1. Проверяем статус сервиса:    
+`systemctl status ops302-status`   
+systemctl status ops302-status  
+● ops302-status.service - OPS-302 status endpoint    
+     Loaded: loaded (/etc/systemd/system/ops302-status.service; enabled; preset: enabled)    
+     Active: active (running)    
+2. Проверяем Listen:  
+`sudo ss -tlnp | grep 8302`    
+LISTEN 0      5          127.0.0.1:8302       0.0.0.0:*    users:(("python3",pid=1005772,fd=3))    
+3. Смотрим curl на порту:  
+`curl -v http://status.ops.lab:8302/`  
+* connect to 127.0.0.2 port 8302 from 127.0.0.1 port 38418 failed: Connection refused    
+4. Проверям куда идет приложение:  
+`getent hosts status.ops.lab`    
+127.0.0.2       status.ops.lab    
+5. Проверям dig  
+`dig +short status.ops.lab`    
+Пусто - dig не читает /etc/hosts  
+6. Смотрим, что в etc/hosts  
+`grep status /etc/hosts`      
+status endpoint, перенесли при переезде    
+127.0.0.2 status.ops.lab    
+- **Причина:**    
+Запись в /etc/hosts указывает имя на 127.0.0.2, а служба слушает только 127.0.0.1     
+Весь диапазон 127.0.0.0/8 это loopback, но слушатель привязан именно к 127.0.0.1, так что на 127.0.0.2 никого нет → поэтому refused.    
+- **Решение:**   
+Меняем запись:  
+``` 
+sudo cp /etc/hosts /etc/hosts.ops302.bak  
+sudo sed -i 's/^127\.0\.0\.2 status\.ops\.lab/127.0.0.1 status.ops.lab/' /etc/hosts  
+getent hosts status.ops.lab  
+  
+``` 
+127.0.0.1       status.ops.lab  
+- **Проверка:**    
+`curl http://status.ops.lab:8302`  
+{"status":"ok"}  
+- **Профилактика:**    
+1. Не держать «временные» записи в /etc/hosts без комментария и владельца; заводить имена в DNS;   
+2. В мониторинге проверять и имя, и адрес;   
+3. всегда начинать с curl -v    
+4. Обязательно документировать ВСЕ переезды(временные/постоянные).    
+
+- **В чём ошибся Сергей:**    
+1. dig ничего не нашёл → «в DNS имени нет, значит, не DNS». Это неправильный вывод: dig не читает /etc/hosts, а curl читает. Нужно было getent hosts.    
+2. active (running) → «сервис в порядке». Это всего лишь означает, что процесс жив. Но при этом он слушает другой адрес, чем тот, куда идёт клиент.    
+3. «Наверное, висит, перезапусти». Это догадка, а не диагностика. Достаточно было curl -v: в нём сразу видно, какой IP пробует curl.    
+
+## OPS-303  
+- **Симптом:**    
+Служба API не стартует после релиза  
+- **Влияние:**    
+Новая версия запускается, но через пару секунд падает в failed.    
+- **Диагностика:**    
+1. Проверяем статус службы"  
+`systemctl status ops303-api`   
+ops303-api.service - OPS-303 API v2    
+     Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)    
+     Active: failed (Result: exit-code)    
+2. Смотрим лог:  
+`journalctl -u ops303-api -n 50 --no-pager`  
+ops303-api.service: Main process exited, code=exited, status=1/FAILURE    
+ops303-api.service: Failed with result 'exit-code'.    
+3. Проверяем, кто держит порт:  
+`sudo ss -tlnp | grep 8303`  
+LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1007022,fd=3))    
+4. Смотрим, что за процесс.  
+ `ps -fp 1007022`  
+ UID          PID    PPID  C STIME TTY          TIME CMD  
+root     1007022 1007020  0 12:28 ?        00:00:00 /usr/bin/python3 -m http.server 8303  
+5. Проверяем, откуда запущен:  
+`sudo ls -l /proc/1007022/cwd`  
+/proc/1007022/cwd -> /opt/ops303/old  
+6. Проверяем curl на порту  
+`curl http://127.0.0.1:8303/`    
+api v1 (old)  
+
+- **Причина:**  
+Порт 8303 занят старым процессом, запущенным вручную вне systemd.      
+Новая служба не может занять порт и падает. Откатывать релиз не нужно.    
+- **Решение:**    
+1. Останавливаем процесс через SIGTERM    
+`sudo kill 1007022`   
+2. Проверяем, что он остановился и grep пустой.  
+`sudo ss -tlnp | grep 8303`  
+3. Сбрасываем счетчик failed:  
+`sudo systemctl reset-failed ops303-api`  
+4. Запускаем процесс  
+`sudo systemctl start ops303-api`  
+  
+ **Проверка:**    
+1. Проверка запуска сервиса.   
+`systemctl status ops303-api`  
+ ops303-api.service - OPS-303 API v2  
      Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)  
-     Active: failed (Result: exit-code)  
-2. Смотрим лог:
-`journalctl -u ops303-api -n 50 --no-pager`
-ops303-api.service: Main process exited, code=exited, status=1/FAILURE  
-ops303-api.service: Failed with result 'exit-code'.  
-3. Проверяем, кто держит порт:
-`sudo ss -tlnp | grep 8303`
-LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1007022,fd=3))  
-4. Смотрим, что за процесс.
- `ps -fp 1007022`
- UID          PID    PPID  C STIME TTY          TIME CMD
-root     1007022 1007020  0 12:28 ?        00:00:00 /usr/bin/python3 -m http.server 8303
-5. Проверяем, откуда запущен:
-`sudo ls -l /proc/1007022/cwd`
-/proc/1007022/cwd -> /opt/ops303/old
-6. Проверяем curl на порту
-curl http://127.0.0.1:8303/
-api v1 (old)
-
-- **Причина:**
-Порт 8303 занят «осиротевшим» старым процессом, запущенным вручную вне systemd.  
-Новая служба не может занять порт и падает. Откатывать релиз не нужно.  
+     Active: active (running)  
+2. Проверяем, что теперь отдает новую версию                 
+`curl http://127.0.0.1:8303/`                
+api v2 (new)  
+3. Проверяем, что приложение слушает по правильному порту и работает под systemd  
+`sudo ss -tlnp | grep 8303`                
+LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1008568,fd=3))   
+- **Профилактика:**  
+1. Pапускать сервисы только через systemd, не через nohup;     
+2. При релизе останавливать старую версию и проверять, что порт свободен (ss);    
+3. Читать journalctl в первую очередь, а не откатывать наугад по предположениям.    
+  
+## OPS-304    
+- **Симптом:**  
+Сайт работает, но healthCheck красный  
+- **Влияние:**  
+Возможно, сломан мониторинг - нет понимания работоспособности связки сайт-мониторинг.  
+- **Диагностика:**  
+1. Проверяем доступность  
+curl -i http://127.0.0.1:8301/health  
+HTTP/1.0 404 File not found  
+- **Причина:**  
+ 404 Not Found. Витрина — это python3 -m http.server, который отдаёт файлы из каталога.   
+ Файла health в каталоге нет. Это не сломанный мониторинг и не сеть: путь /health просто не существует.  
 - **Решение:**  
-1. Останавливаем процесс через SIGTERM  
-`sudo kill 1007022` 
-2. Проверяем, что он остановился и grep пустой.
-`sudo ss -tlnp | grep 8303`
-3. Сбрасываем счетчик failed:
-`sudo systemctl reset-failed ops303-api`
-4. Запускаем процесс
-`sudo systemctl start ops303-api`
-
- **Проверка:**  
-1. Проверка запуска сервиса. 
-`systemctl status ops303-api`
- ops303-api.service - OPS-303 API v2
-     Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)
-     Active: active (running)
-2. Проверяем, что теперб отдает новую версию               
-`curl http://127.0.0.1:8303/`              
-api v2 (new)
-3. Проверяем, что приложение слушает по правильному порту и работает под systemd
-`sudo ss -tlnp | grep 8303`              
-LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1008568,fd=3)) 
-- **Профилактика:**
-1. Pапускать сервисы только через systemd, не через nohup;   
-2. При релизе останавливать старую версию и проверять, что порт свободен (ss);  
-3. Читать journalctl в первую очередь, а не откатывать наугад по предположениям.  
-
-## OPS-304  
-- **Симптом:**
-Сайт работает, но healthCheck красный
-- **Влияние:**
-Возможно, сломан мониторинг.
-- **Диагностика:**
-1. Проверяем доступность
-curl -i http://127.0.0.1:8301/health
-HTTP/1.0 404 File not found
-- **Причина:**
- 404 Not Found. Витрина — это python3 -m http.server, который отдаёт файлы из каталога. 
- Файла health в каталоге нет. Это не сломанный мониторинг и не сеть: путь /health просто не существует.
-- **Решение:**
-1. Добавляем health.
-`echo "ok" | sudo tee /opt/ops301/www/health`
-ok
-2. Добавляем права.
-`sudo chmod 644 /opt/ops301/www/health`
-- **Проверка:**
-Проверяем возврат curl.
-`curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8301/health`
-200
-- **Профилактика:**
-/health это часть приложения, и состояние «что считать здоровым» определяют разработчики. Они должны реализовать механизм, который проверяет реальные зависимости (БД, очередь), а не просто отдаёт файл. Инженер может сделать временную заглушку, чтобы разблокировать мониторинг, но должен сказать об этом и завести задачу разработчикам. Иначе «зелёный» мониторинг будет обманывать: он зелёный, а приложение может быть сломано.
+1. Добавляем health.  
+`echo "ok" | sudo tee /opt/ops301/www/health`  
+ok  
+2. Добавляем права.  
+`sudo chmod 644 /opt/ops301/www/health`  
+- **Проверка:**  
+Проверяем возврат curl.  
+`curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8301/health`  
+200  
+- **Профилактика:**  
+/health это часть приложения, и состояние «что считать здоровым» определяют разработчики. Они должны реализовать механизм, который проверяет реальные зависимости (БД, очередь), а не просто отдаёт файл. Инженер может сделать временную заглушку, чтобы разблокировать мониторинг, но должен сказать об этом и завести задачу разработчикам. Иначе «зелёный» мониторинг будет обманывать: он зелёный, а приложение может быть сломано.  
 
 ## Вопросы для самопроверки
 1. Отличие - 127.0.0.1 и 0.0.0.0: первый слушает только локально, второй на всех адресах машины (доступен снаружи). 
