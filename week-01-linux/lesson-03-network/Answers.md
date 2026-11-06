@@ -84,8 +84,12 @@ Content-Length: 0
 Location: https://github.com/  
 Осуществлен принудительный перевод с незащищенного http на защищенный https.  
   
-3. 
-
+3.  
+Команда:  
+`curl -s -o /dev/null -w "%{http_code}\n" https://github.com/eto-tochno-net-takoy-stranicy-12345`  
+Вывод:  
+404  
+Код 404: сервер работает, но такой страницы нет. Это уровень приложения, сеть работает.  
 
 ## Задание 4. DNS и /etc/hosts
 
