@@ -77,7 +77,7 @@ PING github.com (140.82.121.3) 56(84) bytes of data.
   
 2.  
 Команда:  
-`curl -I http://github.com`  
+`curl -I http://github.com`    
 Вывод:
 HTTP/1.1 301 Moved Permanently  
 Content-Length: 0  
