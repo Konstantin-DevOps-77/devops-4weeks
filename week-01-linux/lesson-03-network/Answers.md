@@ -32,23 +32,23 @@ default via 10.0.0.1 dev enp0s3 onlink
   
 4.  
 Команда:
-`ping -c 3 8.8.8.8`
-Вывод: 
-PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.  
-64 bytes from 8.8.8.8: icmp_seq=1 ttl=119 time=1.37 ms  
-64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=0.829 ms  
-64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=1.92 ms     
-
-Команда:  
-`ping -c 3 github.com`  
-Вывод:    
-PING github.com (140.82.121.3) 56(84) bytes of data.  
-64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=1 ttl=51 time=0.855 ms  
-64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=2 ttl=51 time=0.801 ms  
+`ping -c 3 8.8.8.8`  
+Вывод:   
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.    
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=119 time=1.37 ms    
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=0.829 ms    
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=1.92 ms       
+  
+Команда:    
+`ping -c 3 github.com`    
+Вывод:      
+PING github.com (140.82.121.3) 56(84) bytes of data.    
+64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=1 ttl=51 time=0.855 ms    
+64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=2 ttl=51 time=0.801 ms    
 64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=3 ttl=51 time=0.792 ms  
       
-5. Вторая команда сложнее первой потому что ping идет по имени, что "прибавляет" этап преобразования DNS.  
-Кроме того ICMP-responses от пинга по имени могут ограничить и это не авария.        
+5. Вторая команда сложнее первой потому что ping идет по имени, что "прибавляет" этап преобразования DNS.    
+Кроме того ICMP-responses от пинга по имени могут ограничить и это не авария.          
 
 
 ...
