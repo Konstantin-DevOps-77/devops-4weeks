@@ -179,10 +179,12 @@ ping -c 1 my-test.local
 getent и ping используют системный резолвер, который СНАЧАЛА смотрит /etc/hosts, и НАШЛИ запись. dig ищет только в DNS-серверах, /etc/hosts не читает, поэтому НИЧЕГО не нашёл (вывод пустой).  
   
 5.  
-Команда уборки:
-`sudo mv /etc/hosts.bak /etc/hosts`  
+Команда уборки:  
+`sudo mv /etc/hosts.bak /etc/hosts`    
 Вывод:  
-`getent hosts my-test.local` - ничего не выводит, пустой. 
+`getent hosts my-test.local` - ничего не выводит, пустой.  
+
+
 
 
 
