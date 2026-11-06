@@ -2,484 +2,499 @@
 
 ## Задание 1. Где я в сети
 
-1.   
-**Команда:**     
-`ip -br a`      
-**Вывод:**       
-| Interface | Status  |   Address          |            
-| --------- | ------  |   ---------        |          
-|    lo     | UNKNOWN | 127.0.0.1/8        |           
-|   enp0s3  |   UP    | 212.113.116.203/32 |            
+1.  **Команда:**  
+    `ip -br a`  
+    **Вывод:**  
+    | Interface | Status | Address |  
+    | --------- | ------ | --------- |  
+    | lo | UNKNOWN | 127.0.0.1/8 |  
+    | enp0s3 | UP | 212.113.116.203/32 |
 
-Публичный адрес(public): 213.113.116.203    
-Loopback: 127.0.0.1    
+Публичный адрес(public): 213.113.116.203  
+Loopback: 127.0.0.1
 
-2. 
-**Команда:**  
-`ip r`  
-**Вывод:**
-default via 10.0.0.1 dev enp0s3 onlink   
-Шлюз по умолчанию - 10.0.0.1  
-  
-3.     
-Команда:   
-`curl -s ifconfig.me; echo`  
-Вывод:  
-212.213.116.203.  
-Адрес СОВПАДАЕТ с адресом интерфейса enp0s3.  
-В облачных сервисах он может НЕ совпадать, потому что виртуалка знает только свой ЧАСТНЫЙ адрес.  
-Публичный(внешний) адрес "подставляет" NAT, транслируя адреса снаружи/внутрь и наоборот.   
-  
-4.  
+2.  **Команда:**  
+    `ip r`  
+    **Вывод:**
+    default via 10.0.0.1 dev enp0s3 onlink  
+    Шлюз по умолчанию - 10.0.0.1
+
+3.  Команда:  
+    `curl -s ifconfig.me; echo`  
+    Вывод:  
+    212.213.116.203.  
+    Адрес СОВПАДАЕТ с адресом интерфейса enp0s3.  
+    В облачных сервисах он может НЕ совпадать, потому что виртуалка знает только свой ЧАСТНЫЙ адрес.  
+    Публичный(внешний) адрес "подставляет" NAT, транслируя адреса снаружи/внутрь и наоборот.
+
+4.  Команда:  
+    `ping -c 3 8.8.8.8`  
+    Вывод:  
+    PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.  
+    64 bytes from 8.8.8.8: icmp_seq=1 ttl=119 time=1.37 ms  
+    64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=0.829 ms  
+    64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=1.92 ms
+
 Команда:  
-`ping -c 3 8.8.8.8`  
-Вывод:   
-PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.    
-64 bytes from 8.8.8.8: icmp_seq=1 ttl=119 time=1.37 ms    
-64 bytes from 8.8.8.8: icmp_seq=2 ttl=119 time=0.829 ms    
-64 bytes from 8.8.8.8: icmp_seq=3 ttl=119 time=1.92 ms       
-  
-Команда:      
-`ping -c 3 github.com`    
-Вывод:      
-PING github.com (140.82.121.3) 56(84) bytes of data.    
-64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=1 ttl=51 time=0.855 ms    
-64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=2 ttl=51 time=0.801 ms    
-64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=3 ttl=51 time=0.792 ms  
-      
-5. Вторая команда сложнее первой потому что ping идет по имени, что "прибавляет" этап преобразования DNS.    
-Кроме того ICMP-responses от пинга по имени могут ограничить и это не авария.          
+`ping -c 3 github.com`  
+Вывод:  
+PING github.com (140.82.121.3) 56(84) bytes of data.  
+64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=1 ttl=51 time=0.855 ms  
+64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=2 ttl=51 time=0.801 ms  
+64 bytes from lb-140-82-121-3-fra.github.com (140.82.121.3): icmp_seq=3 ttl=51 time=0.792 ms
 
+5. Вторая команда сложнее первой потому что ping идет по имени, что "прибавляет" этап преобразования DNS.  
+   Кроме того ICMP-responses от пинга по имени могут ограничить и это не авария.
 
 ...
 
 ## Задание 2. Кто слушает порты
-| Порт | Протокол | Адрес      | Процесс             | Доступен снаружи? Почему        |
-| ---  | ---      |  ---       |---                  |      ---                        |  
-|  53  | TCP/UDP  | 127.0.0.53 | systemd-resolve     | Недоступен - локальный резолвер |  
-|  22  |   TCP    | 0.0.0.0    |  sshd               | Да, если пустит FW              |
-| 443  | TCP/UDP  | 0.0.0.0    | nginx               | Да, если пустит FW              |  
-  
 
+| Порт | Протокол | Адрес      | Процесс         | Доступен снаружи? Почему        |
+| ---- | -------- | ---------- | --------------- | ------------------------------- |
+| 53   | TCP/UDP  | 127.0.0.53 | systemd-resolve | Недоступен - локальный резолвер |
+| 22   | TCP      | 0.0.0.0    | sshd            | Да, если пустит FW              |
+| 443  | TCP/UDP  | 0.0.0.0    | nginx           | Да, если пустит FW              |
 
+## Задание 3. curl по шагам
 
-## Задание 3. curl по шагам  
-  
-1. 
-Команда:  
-`curl -v https://github.com -o /dev/null 2>&1 | head -40`  
+1.  Команда:  
+    `curl -v https://github.com -o /dev/null 2>&1 | head -40`
 
-Вывод:  
-1.1 Подключились - IP - 140.82.121.3:443    
-1.2 Строка об установлении соединения - Connected to github.com (140.82.121.3) port 443  
-1.3 Версия TLS - TLSv1.3  
-1.4 Код ответа - < HTTP/2 200 - OK - то есть соединение установлено.
-  
-2.  
-Команда:  
-`curl -I http://github.com`    
+    Вывод:  
+    1.1 Подключились - IP - 140.82.121.3:443  
+    1.2 Строка об установлении соединения - Connected to github.com (140.82.121.3) port 443  
+    1.3 Версия TLS - TLSv1.3  
+    1.4 Код ответа - < HTTP/2 200 - OK - то есть соединение установлено.
+
+2.  Команда:  
+    `curl -I http://github.com`  
+    Вывод:
+    HTTP/1.1 301 Moved Permanently  
+    Content-Length: 0  
+    Location: https://github.com/  
+    Осуществлен принудительный перевод с незащищенного http на защищенный https.
+
+3.  Команда:  
+    `curl -s -o /dev/null -w "%{http_code}\n" https://github.com/eto-tochno-net-takoy-stranicy-12345`  
+    Вывод:  
+    404  
+    Код 404: сервер работает, но такой страницы нет. Это уровень приложения, сеть работает.
+
+4.  Команда:  
+    `curl -v -m 5 http://10.255.255.1`  
+    Вывод:
+
+    - Trying 10.255.255.1:80...
+    - Connection timed out after 5002 milliseconds
+    - Closing connection  
+      curl: (28) Connection timed out after 5002 milliseconds
+
+    Закрыто по timeout. Адрес частный и несуществующий. Пакет уходит к шлюзу и там пропадает, никто не отвечает ни отказом, ни согласием. Тишина = timeout.
+
+5.  Команда:
+    `curl -v http://127.0.0.1:1`  
+    Вывод:
+
+    - Trying 127.0.0.1:1...
+    - connect to 127.0.0.1 port 1 from 127.0.0.1 port 55894 failed: Connection refused
+    - Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server
+    - Closing connection  
+      curl: (7) Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server
+
+    Это refused.
+    Кратко разница - В пункте 4 пакет вообще не нашёл адресата и ответа нет(timeout). Refused значит «до хоста дошли, порт пустой»; timeout значит «куда-то пропало по дороге».
+
+## Задание 4. DNS и /etc/hosts
+
+1.  Команда:  
+    `cat /etc/resolv.conf`
+
 Вывод:
-HTTP/1.1 301 Moved Permanently  
-Content-Length: 0  
-Location: https://github.com/  
-Осуществлен принудительный перевод с незащищенного http на защищенный https.  
-  
-3.  
-Команда:  
-`curl -s -o /dev/null -w "%{http_code}\n" https://github.com/eto-tochno-net-takoy-stranicy-12345`  
-Вывод:  
-404  
-Код 404: сервер работает, но такой страницы нет. Это уровень приложения, сеть работает.  
 
-4. 
-Команда:  
-`curl -v -m 5 http://10.255.255.1`  
-Вывод:
-*   Trying 10.255.255.1:80...  
-* Connection timed out after 5002 milliseconds  
-* Closing connection  
-curl: (28) Connection timed out after 5002 milliseconds  
-
-Закрыто по timeout. Адрес частный и несуществующий. Пакет уходит к шлюзу и там пропадает, никто не отвечает ни отказом, ни согласием. Тишина = timeout.  
-
-5.  
-Команда:
-`curl -v http://127.0.0.1:1`  
-Вывод:
-*   Trying 127.0.0.1:1...  
-* connect to 127.0.0.1 port 1 from 127.0.0.1 port 55894 failed: Connection refused  
-* Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server  
-* Closing connection  
-curl: (7) Failed to connect to 127.0.0.1 port 1 after 0 ms: Couldn't connect to server  
-
-Это refused.
-Кратко разница -  В пункте 4 пакет вообще не нашёл адресата и ответа нет(timeout). Refused значит «до хоста дошли, порт пустой»; timeout значит «куда-то пропало по дороге».   
-
-## Задание 4. DNS и /etc/hosts  
-1.    
-Команда:  
-`cat /etc/resolv.conf`  
-  
-Вывод:  
 # Generated by Aeza VM manager
+
 nameserver 8.8.8.8  
-nameserver 1.1.1.1  
+nameserver 1.1.1.1
 
 Команда:  
-`resolvectl status | head -20`  
-  
+`resolvectl status | head -20`
+
 Вывод:  
 Link 2 (enp0s3)  
-    Current Scopes: DNS  
-         Protocols: +DefaultRoute -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported  
-       DNS Servers: 1.1.1.1 8.8.8.8  
-  
+ Current Scopes: DNS  
+ Protocols: +DefaultRoute -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported  
+ DNS Servers: 1.1.1.1 8.8.8.8
+
 Используются DNS-серверs - 1.1.1.1 и 8.8.8.8
-  
-2.  
-Команда:  
-`dig github.com`
+
+2.  Команда:  
+    `dig github.com`
+    Вывод:  
+    ;; ANSWER SECTION:  
+    github.com. 60 IN A 140.82.121.4
+
+Отсчитал 10 секунд:
+
 Вывод:  
 ;; ANSWER SECTION:  
-github.com.             60      IN      A       140.82.121.4  
-  
-Отсчитал 10 секунд:  
-  
-Вывод:  
-;; ANSWER SECTION:  
-github.com.             45      IN      A       140.82.121.4    
-  
-TTL (Time To Live) это число секунд, сколько ответ можно хранить в кэше. Через 10 секунд значение уменьшится (было 60, стало 45), потому что ответ отдаёт кэш локального резолвера, и он отсчитывает оставшееся время. Когда TTL дойдёт до нуля, запись запрашивают заново и отсчёт идёт сначала(будет снова 60).    
-  
-3.    
-Команда:    
-`dig +short github.com @1.1.1.1`  
-Вывод:    
-20.250.119.67    
-  
+github.com. 45 IN A 140.82.121.4
+
+TTL (Time To Live) это число секунд, сколько ответ можно хранить в кэше. Через 10 секунд значение уменьшится (было 60, стало 45), потому что ответ отдаёт кэш локального резолвера, и он отсчитывает оставшееся время. Когда TTL дойдёт до нуля, запись запрашивают заново и отсчёт идёт сначала(будет снова 60).
+
+3.  Команда:  
+    `dig +short github.com @1.1.1.1`  
+    Вывод:  
+    20.250.119.67
+
 Команда:  
-`dig +short github.com @8.8.8.8`    
-Вывод:    
-140.82.121.3    
-  
+`dig +short github.com @8.8.8.8`  
+Вывод:  
+140.82.121.3
+
 Вывод.  
-Адреса могут отличаться. Это может быть связано с тем, DNS используют для балансировки нагрузки (разные адреса из пула, ротация), для геопривязки (ближайший к резолверу сервер) и кэши у разных серверов обновляются в разное время. 
+Адреса могут отличаться. Это может быть связано с тем, DNS используют для балансировки нагрузки (разные адреса из пула, ротация), для геопривязки (ближайший к резолверу сервер) и кэши у разных серверов обновляются в разное время.
 
-4.  
-Команды:   
-``` 
-sudo cp /etc/hosts /etc/hosts.bak  
-echo "127.0.0.1 my-test.local" | sudo tee -a /etc/hosts  
-getent hosts my-test.local  
-dig +short my-test.local  
-ping -c 1 my-test.local  
+4.  Команды:
 
-```  
+```
+sudo cp /etc/hosts /etc/hosts.bak
+echo "127.0.0.1 my-test.local" | sudo tee -a /etc/hosts
+getent hosts my-test.local
+dig +short my-test.local
+ping -c 1 my-test.local
+
+```
+
 Вывод:  
-getent и ping используют системный резолвер, который СНАЧАЛА смотрит /etc/hosts, и НАШЛИ запись. dig ищет только в DNS-серверах, /etc/hosts не читает, поэтому НИЧЕГО не нашёл (вывод пустой).  
-  
-5.  
-Команда уборки:  
-`sudo mv /etc/hosts.bak /etc/hosts`    
-Вывод:  
-`getent hosts my-test.local` - ничего не выводит, пустой.  
+getent и ping используют системный резолвер, который СНАЧАЛА смотрит /etc/hosts, и НАШЛИ запись. dig ищет только в DNS-серверах, /etc/hosts не читает, поэтому НИЧЕГО не нашёл (вывод пустой).
 
-
-
-
+5.  Команда уборки:  
+    `sudo mv /etc/hosts.bak /etc/hosts`  
+    Вывод:  
+    `getent hosts my-test.local` - ничего не выводит, пустой.
 
 ## Задание 5. Свой веб-сервер
 
 Штатная привязка(привязка "ДО")
 
 sudo ss -tlnp | grep 8080
-LISTEN 0      5            0.0.0.0:8080       0.0.0.0:*    users:(("python3",pid=1001920,fd=3)) 
+LISTEN 0 5 0.0.0.0:8080 0.0.0.0:\* users:(("python3",pid=1001920,fd=3))
 
 curl http://127.0.0.1:8080
+
 <h1>Kostya server</h1>
 
-PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8080  
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8080
 
+ComputerName : 212.113.116.203  
+RemoteAddress : 212.113.116.203  
+RemotePort : 8080  
+InterfaceAlias : happ-xray  
+SourceAddress : 172.19.0.1  
+TcpTestSucceeded : True
 
-ComputerName     : 212.113.116.203  
-RemoteAddress    : 212.113.116.203  
-RemotePort       : 8080  
-InterfaceAlias   : happ-xray  
-SourceAddress    : 172.19.0.1  
-TcpTestSucceeded : True  
-
-Перепривязка на 127.0.0.1 
+Перепривязка на 127.0.0.1
 python3 -m http.server 8080 --bind 127.0.0.1 --directory ~/web
 
 sudo ss -tlnp | grep 8080
-LISTEN 0      5          127.0.0.1:8080       0.0.0.0:*    users:(("python3",pid=1015058,fd=3))                       
+LISTEN 0 5 127.0.0.1:8080 0.0.0.0:\* users:(("python3",pid=1015058,fd=3))  
 root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-03-network# curl http://127.0.0.1:8080
+
 <h1>Kostya server</h1>
 
 Внешний доступ:
 PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8080
 
-
-ComputerName     : 212.113.116.203
-RemoteAddress    : 212.113.116.203
-RemotePort       : 8080
-InterfaceAlias   : happ-xray
-SourceAddress    : 172.19.0.1
+ComputerName : 212.113.116.203
+RemoteAddress : 212.113.116.203
+RemotePort : 8080
+InterfaceAlias : happ-xray
+SourceAddress : 172.19.0.1
 TcpTestSucceeded : True
 
 НО!
 Сайт работает внутри!
 Прямого внешнего доступа по публичному IP:8080 нет
-Страница возвращает Empty responce. 
-
+Страница возвращает Empty responce.
 
 ## Задание 6. Фаервол
+
 Команда:  
 `sudo ufw status verbose`  
 Вывод:  
 active.  
 Команда:  
-`sudo ufw show added`   
+`sudo ufw show added`  
 Вывод:  
 Added user rules (see 'ufw status' for running firewall):  
 ufw allow 22/tcp  
 ufw allow 80/tcp  
 ufw allow 443/tcp  
 ufw allow 443/udp  
-ufw allow 37363/tcp    
-ufw allow 8443/tcp  
+ufw allow 37363/tcp  
+ufw allow 8443/tcp
 
-sudo ufw allow 22/tcp             SSH 
-sudo ufw allow Порт VPN/udp    # AmneziaWG
+sudo ufw allow 22/tcp SSH
+sudo ufw allow Порт VPN/udp # AmneziaWG
 
 ## OPS-301
+
 - **Симптом:**  
-Сайт на 8301 не открывается снаружи  
+  Сайт на 8301 не открывается снаружи
 - **Влияние:**  
-Внешние пользователи не могут зайти в магазин - сервис недоступен.    
+  Внешние пользователи не могут зайти в магазин - сервис недоступен.
 - **Диагностика:**  
-Команда(Проверяем статус сервиса):  
-`systemctl status ops301-web`
-Вывод:  
-ops301-web.service - OPS-301 shop frontend  
-     Loaded: loaded (/etc/systemd/system/ops301-web.service; enabled; preset: enabled)  
-     Active: active (running)
+  Команда(Проверяем статус сервиса):  
+  `systemctl status ops301-web`
+  Вывод:  
+  ops301-web.service - OPS-301 shop frontend  
+   Loaded: loaded (/etc/systemd/system/ops301-web.service; enabled; preset: enabled)  
+   Active: active (running)
 
 Команда(проверяем, какой порт на LISTEN):  
-`sudo ss -tlnp | grep 8301`    
+`sudo ss -tlnp | grep 8301`  
 Вывод:
-LISTEN 0      5          127.0.0.1:8301       0.0.0.0:*    users:(("python3",pid=1003226,fd=3))  
-
+LISTEN 0 5 127.0.0.1:8301 0.0.0.0:\* users:(("python3",pid=1003226,fd=3))
 
 Команда(проверяем, что сервис жив внутри):  
  curl -v http://127.0.0.1:8301
-*   Trying 127.0.0.1:8301...
-* Connected to 127.0.0.1 (127.0.0.1) port 8301
-> GET / HTTP/1.1
-> Host: 127.0.0.1:8301
-> User-Agent: curl/8.5.0
-> Accept: */*
-<h1>Витрина работает</h1>
+
+- Trying 127.0.0.1:8301...
+- Connected to 127.0.0.1 (127.0.0.1) port 8301
+  > GET / HTTP/1.1
+  > Host: 127.0.0.1:8301
+  > User-Agent: curl/8.5.0
+  > Accept: _/_
+  <h1>Витрина работает</h1>
 
 Команда(проверяем, что с правилами на FW):  
 `sudo ufw status numbered`  
 Вывод:  
-     To                         Action      From  
-     --                         ------      ----  
-[ 1] 22/tcp                     ALLOW IN    Anywhere                    
-[ 2] 80/tcp                     ALLOW IN    Anywhere                    
-[ 3] 443/tcp                    ALLOW IN    Anywhere                  
-[ 4] 443/udp                    ALLOW IN    Anywhere                  
-[ 5] 37363/tcp                  ALLOW IN    Anywhere                  
-[ 6] 8443/tcp                   ALLOW IN    Anywhere                  
-[ 7] 8301/tcp                   DENY IN     Anywhere                  
-[ 8] 22/tcp (v6)                ALLOW IN    Anywhere (v6)               
-[ 9] 80/tcp (v6)                ALLOW IN    Anywhere (v6)             
-[10] 443/tcp (v6)               ALLOW IN    Anywhere (v6)             
-[11] 443/udp (v6)               ALLOW IN    Anywhere (v6)             
-[12] 37363/tcp (v6)             ALLOW IN    Anywhere (v6)             
-[13] 8443/tcp (v6)              ALLOW IN    Anywhere (v6)             
-[14] 8301/tcp (v6)              DENY IN     Anywhere (v6)  
-- **Причина:**  
+ To Action From  
+ -- ------ ----  
+[ 1] 22/tcp ALLOW IN Anywhere  
+[ 2] 80/tcp ALLOW IN Anywhere  
+[ 3] 443/tcp ALLOW IN Anywhere  
+[ 4] 443/udp ALLOW IN Anywhere  
+[ 5] 37363/tcp ALLOW IN Anywhere  
+[ 6] 8443/tcp ALLOW IN Anywhere  
+[ 7] 8301/tcp DENY IN Anywhere  
+[ 8] 22/tcp (v6) ALLOW IN Anywhere (v6)  
+[ 9] 80/tcp (v6) ALLOW IN Anywhere (v6)  
+[10] 443/tcp (v6) ALLOW IN Anywhere (v6)  
+[11] 443/udp (v6) ALLOW IN Anywhere (v6)  
+[12] 37363/tcp (v6) ALLOW IN Anywhere (v6)  
+[13] 8443/tcp (v6) ALLOW IN Anywhere (v6)  
+[14] 8301/tcp (v6) DENY IN Anywhere (v6)
+
+- **Причина:**
+
 1. Служба слушает 127.0.0.1, снаружи недоступна. Поэтому внутри все ок, снаружи - нет.
 2. UFW блокирует 8301. Необходимо исправить правила.
 
-- **Решение:**    
+- **Решение:**
+
 1. Обновляем init-файл:  
-`sudo systemctl edit --full ops301-web.service` - сменим привязку --bind 127.0.0.1 на --bind 0.0.0.0    
-`sudo systemctl daemon-reload`          - перезагружаем демон после правки unit-файла  
-`sudo systemctl restart ops301-web`     - рестартим сам сервис    
-`sudo ss -tlnp | grep 8301`             - теперь Listen правильный  
-LISTEN 0      5            0.0.0.0:8301       0.0.0.0:*    users:(("python3",pid=1004691,fd=3))    
+   `sudo systemctl edit --full ops301-web.service` - сменим привязку --bind 127.0.0.1 на --bind 0.0.0.0  
+   `sudo systemctl daemon-reload` - перезагружаем демон после правки unit-файла  
+   `sudo systemctl restart ops301-web` - рестартим сам сервис  
+   `sudo ss -tlnp | grep 8301` - теперь Listen правильный  
+   LISTEN 0 5 0.0.0.0:8301 0.0.0.0:\* users:(("python3",pid=1004691,fd=3))
 
 2. Редактируем правила FW:  
-`sudo ufw delete deny 8301/tcp`  
-Rule deleted  
-Rule deleted (v6)  
-`sudo ufw allow 8301/tcp`  
-Rule added  
-Rule added (v6)  
+   `sudo ufw delete deny 8301/tcp`  
+   Rule deleted  
+   Rule deleted (v6)  
+   `sudo ufw allow 8301/tcp`  
+   Rule added  
+   Rule added (v6)
+
 - **Проверка:**  
-PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8081  
-  
-ComputerName     : 212.113.116.203  
-RemoteAddress    : 212.113.116.203  
-RemotePort       : 8081  
-InterfaceAlias   : happ-xray  
-SourceAddress    : 172.19.0.1  
-TcpTestSucceeded : True  
-    
-- **Профилактика:**  
-1. При выкатке сервиса сразу проверять на адрес прослушивания; 
+  PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8081  
+
+
+ComputerName : 212.113.116.203  
+RemoteAddress : 212.113.116.203  
+RemotePort : 8081  
+InterfaceAlias : happ-xray  
+SourceAddress : 172.19.0.1  
+TcpTestSucceeded : True
+
+- **Профилактика:**
+
+1. При выкатке сервиса сразу проверять на адрес прослушивания;
 2. Открывать порт в фаерволе как часть процесса деплоя;
 3. В обязательном порядке проверять доступность снаружи, а не только с сервера изнутри;
 4. Описать порты в документации/чек-листе релиза. Ещё также, нет ли облачного фаервола, и если да - активен ли он и какие правила там установлены.
 
-## OPS-302  
+## OPS-302
+
 - **Симптом:**  
-Мониторинг не видит статус сервиса  
+  Мониторинг не видит статус сервиса
 - **Влияние:**  
-Нет доступа - connection refused   
-- **Диагностика:**  
-1. Проверяем статус сервиса:    
-`systemctl status ops302-status`   
-systemctl status ops302-status  
-● ops302-status.service - OPS-302 status endpoint    
-     Loaded: loaded (/etc/systemd/system/ops302-status.service; enabled; preset: enabled)    
-     Active: active (running)    
+  Нет доступа - connection refused
+- **Диагностика:**
+
+1. Проверяем статус сервиса:  
+   `systemctl status ops302-status`  
+   systemctl status ops302-status  
+   ● ops302-status.service - OPS-302 status endpoint  
+    Loaded: loaded (/etc/systemd/system/ops302-status.service; enabled; preset: enabled)  
+    Active: active (running)
 2. Проверяем Listen:  
-`sudo ss -tlnp | grep 8302`    
-LISTEN 0      5          127.0.0.1:8302       0.0.0.0:*    users:(("python3",pid=1005772,fd=3))    
+   `sudo ss -tlnp | grep 8302`  
+   LISTEN 0 5 127.0.0.1:8302 0.0.0.0:\* users:(("python3",pid=1005772,fd=3))
 3. Смотрим curl на порту:  
-`curl -v http://status.ops.lab:8302/`  
-* connect to 127.0.0.2 port 8302 from 127.0.0.1 port 38418 failed: Connection refused    
+   `curl -v http://status.ops.lab:8302/`
+
+- connect to 127.0.0.2 port 8302 from 127.0.0.1 port 38418 failed: Connection refused
+
 4. Проверям куда идет приложение:  
-`getent hosts status.ops.lab`    
-127.0.0.2       status.ops.lab    
+   `getent hosts status.ops.lab`  
+   127.0.0.2 status.ops.lab
 5. Проверям dig  
-`dig +short status.ops.lab`    
-Пусто - dig не читает /etc/hosts  
+   `dig +short status.ops.lab`  
+   Пусто - dig не читает /etc/hosts
 6. Смотрим, что в etc/hosts  
-`grep status /etc/hosts`      
-status endpoint, перенесли при переезде    
-127.0.0.2 status.ops.lab    
-- **Причина:**    
-Запись в /etc/hosts указывает имя на 127.0.0.2, а служба слушает только 127.0.0.1     
-Весь диапазон 127.0.0.0/8 это loopback, но слушатель привязан именно к 127.0.0.1, так что на 127.0.0.2 никого нет → поэтому refused.    
-- **Решение:**   
-Меняем запись:  
-``` 
-sudo cp /etc/hosts /etc/hosts.ops302.bak  
-sudo sed -i 's/^127\.0\.0\.2 status\.ops\.lab/127.0.0.1 status.ops.lab/' /etc/hosts  
-getent hosts status.ops.lab  
-  
-``` 
-127.0.0.1       status.ops.lab  
-- **Проверка:**    
-`curl http://status.ops.lab:8302`  
-{"status":"ok"}  
-- **Профилактика:**    
-1. Не держать «временные» записи в /etc/hosts без комментария и владельца; заводить имена в DNS;   
-2. В мониторинге проверять и имя, и адрес;   
-3. всегда начинать с curl -v    
-4. Обязательно документировать ВСЕ переезды(временные/постоянные).    
-
-- **В чём ошибся Сергей:**    
-1. dig ничего не нашёл → «в DNS имени нет, значит, не DNS». Это неправильный вывод: dig не читает /etc/hosts, а curl читает. Нужно было getent hosts.    
-2. active (running) → «сервис в порядке». Это всего лишь означает, что процесс жив. Но при этом он слушает другой адрес, чем тот, куда идёт клиент.    
-3. «Наверное, висит, перезапусти». Это догадка, а не диагностика. Достаточно было curl -v: в нём сразу видно, какой IP пробует curl.    
-
-## OPS-303  
-- **Симптом:**    
-Служба API не стартует после релиза  
-- **Влияние:**    
-Новая версия запускается, но через пару секунд падает в failed.    
-- **Диагностика:**    
-1. Проверяем статус службы"  
-`systemctl status ops303-api`   
-ops303-api.service - OPS-303 API v2    
-     Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)    
-     Active: failed (Result: exit-code)    
-2. Смотрим лог:  
-`journalctl -u ops303-api -n 50 --no-pager`  
-ops303-api.service: Main process exited, code=exited, status=1/FAILURE    
-ops303-api.service: Failed with result 'exit-code'.    
-3. Проверяем, кто держит порт:  
-`sudo ss -tlnp | grep 8303`  
-LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1007022,fd=3))    
-4. Смотрим, что за процесс.  
- `ps -fp 1007022`  
- UID          PID    PPID  C STIME TTY          TIME CMD  
-root     1007022 1007020  0 12:28 ?        00:00:00 /usr/bin/python3 -m http.server 8303  
-5. Проверяем, откуда запущен:  
-`sudo ls -l /proc/1007022/cwd`  
-/proc/1007022/cwd -> /opt/ops303/old  
-6. Проверяем curl на порту  
-`curl http://127.0.0.1:8303/`    
-api v1 (old)  
+   `grep status /etc/hosts`  
+   status endpoint, перенесли при переезде  
+   127.0.0.2 status.ops.lab
 
 - **Причина:**  
-Порт 8303 занят старым процессом, запущенным вручную вне systemd.      
-Новая служба не может занять порт и падает. Откатывать релиз не нужно.    
-- **Решение:**    
-1. Останавливаем процесс через SIGTERM    
-`sudo kill 1007022`   
-2. Проверяем, что он остановился и grep пустой.  
-`sudo ss -tlnp | grep 8303`  
-3. Сбрасываем счетчик failed:  
-`sudo systemctl reset-failed ops303-api`  
-4. Запускаем процесс  
-`sudo systemctl start ops303-api`  
-  
- **Проверка:**    
-1. Проверка запуска сервиса.   
-`systemctl status ops303-api`  
- ops303-api.service - OPS-303 API v2  
-     Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)  
-     Active: active (running)  
-2. Проверяем, что теперь отдает новую версию                 
-`curl http://127.0.0.1:8303/`                
-api v2 (new)  
-3. Проверяем, что приложение слушает по правильному порту и работает под systemd  
-`sudo ss -tlnp | grep 8303`                
-LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1008568,fd=3))   
-- **Профилактика:**  
-1. Pапускать сервисы только через systemd, не через nohup;     
-2. При релизе останавливать старую версию и проверять, что порт свободен (ss);    
-3. Читать journalctl в первую очередь, а не откатывать наугад по предположениям.    
-  
-## OPS-304    
-- **Симптом:**  
-Сайт работает, но healthCheck красный  
-- **Влияние:**  
-Возможно, сломан мониторинг - нет понимания работоспособности связки сайт-мониторинг.  
-- **Диагностика:**  
-1. Проверяем доступность  
-curl -i http://127.0.0.1:8301/health  
-HTTP/1.0 404 File not found  
-- **Причина:**  
- 404 Not Found. Витрина — это python3 -m http.server, который отдаёт файлы из каталога.   
- Файла health в каталоге нет. Это не сломанный мониторинг и не сеть: путь /health просто не существует.  
+  Запись в /etc/hosts указывает имя на 127.0.0.2, а служба слушает только 127.0.0.1  
+  Весь диапазон 127.0.0.0/8 это loopback, но слушатель привязан именно к 127.0.0.1, так что на 127.0.0.2 никого нет → поэтому refused.
 - **Решение:**  
-1. Добавляем health.  
-`echo "ok" | sudo tee /opt/ops301/www/health`  
-ok  
-2. Добавляем права.  
-`sudo chmod 644 /opt/ops301/www/health`  
+  Меняем запись:
+
+```
+sudo cp /etc/hosts /etc/hosts.ops302.bak
+sudo sed -i 's/^127\.0\.0\.2 status\.ops\.lab/127.0.0.1 status.ops.lab/' /etc/hosts
+getent hosts status.ops.lab
+
+```
+
+127.0.0.1 status.ops.lab
+
 - **Проверка:**  
-Проверяем возврат curl.  
-`curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8301/health`  
-200  
+  `curl http://status.ops.lab:8302`  
+  {"status":"ok"}
+- **Профилактика:**
+
+1. Не держать «временные» записи в /etc/hosts без комментария и владельца; заводить имена в DNS;
+2. В мониторинге проверять и имя, и адрес;
+3. всегда начинать с curl -v
+4. Обязательно документировать ВСЕ переезды(временные/постоянные).
+
+- **В чём ошибся Сергей:**
+
+1. dig ничего не нашёл → «в DNS имени нет, значит, не DNS». Это неправильный вывод: dig не читает /etc/hosts, а curl читает. Нужно было getent hosts.
+2. active (running) → «сервис в порядке». Это всего лишь означает, что процесс жив. Но при этом он слушает другой адрес, чем тот, куда идёт клиент.
+3. «Наверное, висит, перезапусти». Это догадка, а не диагностика. Достаточно было curl -v: в нём сразу видно, какой IP пробует curl.
+
+## OPS-303
+
+- **Симптом:**  
+  Служба API не стартует после релиза
+- **Влияние:**  
+  Новая версия запускается, но через пару секунд падает в failed.
+- **Диагностика:**
+
+1. Проверяем статус службы"  
+   `systemctl status ops303-api`  
+   ops303-api.service - OPS-303 API v2  
+    Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)  
+    Active: failed (Result: exit-code)
+2. Смотрим лог:  
+   `journalctl -u ops303-api -n 50 --no-pager`  
+   ops303-api.service: Main process exited, code=exited, status=1/FAILURE  
+   ops303-api.service: Failed with result 'exit-code'.
+3. Проверяем, кто держит порт:  
+   `sudo ss -tlnp | grep 8303`  
+   LISTEN 0 5 0.0.0.0:8303 0.0.0.0:\* users:(("python3",pid=1007022,fd=3))
+4. Смотрим, что за процесс.  
+    `ps -fp 1007022`  
+    UID PID PPID C STIME TTY TIME CMD  
+   root 1007022 1007020 0 12:28 ? 00:00:00 /usr/bin/python3 -m http.server 8303
+5. Проверяем, откуда запущен:  
+   `sudo ls -l /proc/1007022/cwd`  
+   /proc/1007022/cwd -> /opt/ops303/old
+6. Проверяем curl на порту  
+   `curl http://127.0.0.1:8303/`  
+   api v1 (old)
+
+- **Причина:**  
+  Порт 8303 занят старым процессом, запущенным вручную вне systemd.  
+  Новая служба не может занять порт и падает. Откатывать релиз не нужно.
+- **Решение:**
+
+1. Останавливаем процесс через SIGTERM  
+   `sudo kill 1007022`
+2. Проверяем, что он остановился и grep пустой.  
+   `sudo ss -tlnp | grep 8303`
+3. Сбрасываем счетчик failed:  
+   `sudo systemctl reset-failed ops303-api`
+4. Запускаем процесс  
+   `sudo systemctl start ops303-api`
+
+**Проверка:**
+
+1. Проверка запуска сервиса.  
+   `systemctl status ops303-api`  
+    ops303-api.service - OPS-303 API v2  
+    Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)  
+    Active: active (running)
+2. Проверяем, что теперь отдает новую версию  
+   `curl http://127.0.0.1:8303/`  
+   api v2 (new)
+3. Проверяем, что приложение слушает по правильному порту и работает под systemd  
+   `sudo ss -tlnp | grep 8303`  
+   LISTEN 0 5 0.0.0.0:8303 0.0.0.0:\* users:(("python3",pid=1008568,fd=3))
+
+- **Профилактика:**
+
+1. Pапускать сервисы только через systemd, не через nohup;
+2. При релизе останавливать старую версию и проверять, что порт свободен (ss);
+3. Читать journalctl в первую очередь, а не откатывать наугад по предположениям.
+
+## OPS-304
+
+- **Симптом:**  
+  Сайт работает, но healthCheck красный
+- **Влияние:**  
+  Возможно, сломан мониторинг - нет понимания работоспособности связки сайт-мониторинг.
+- **Диагностика:**
+
+1. Проверяем доступность  
+   curl -i http://127.0.0.1:8301/health  
+   HTTP/1.0 404 File not found
+
+- **Причина:**  
+  404 Not Found. Витрина — это python3 -m http.server, который отдаёт файлы из каталога.  
+  Файла health в каталоге нет. Это не сломанный мониторинг и не сеть: путь /health просто не существует.
+- **Решение:**
+
+1. Добавляем health.  
+   `echo "ok" | sudo tee /opt/ops301/www/health`  
+   ok
+2. Добавляем права.  
+   `sudo chmod 644 /opt/ops301/www/health`
+
+- **Проверка:**  
+  Проверяем возврат curl.  
+  `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8301/health`  
+  200
 - **Профилактика:**  
-/health это часть приложения, и состояние «что считать здоровым» определяют разработчики. Они должны реализовать механизм, который проверяет реальные зависимости (БД, очередь), а не просто отдаёт файл. Инженер может сделать временную заглушку, чтобы разблокировать мониторинг, но должен сказать об этом и завести задачу разработчикам. Иначе «зелёный» мониторинг будет обманывать: он зелёный, а приложение может быть сломано.  
+  /health это часть приложения, и состояние «что считать здоровым» определяют разработчики. Они должны реализовать механизм, который проверяет реальные зависимости (БД, очередь), а не просто отдаёт файл. Инженер может сделать временную заглушку, чтобы разблокировать мониторинг, но должен сказать об этом и завести задачу разработчикам. Иначе «зелёный» мониторинг будет обманывать: он зелёный, а приложение может быть сломано.
 
 ## Вопросы для самопроверки
-1. Отличие - 127.0.0.1 и 0.0.0.0: первый слушает только локально, второй на всех адресах машины (доступен снаружи). 
-2. Refused и timeout: refused это быстрый отказ, на порту никто не слушает (или слушает другой адрес); timeout это тишина, чаще всего фаервол или недоступный адрес.   
-3. TCP и UDP: TCP с соединением и гарантией (SSH, HTTPS); UDP без гарантий и быстро (DNS, VPN/WireGuard).  
-4. Порядок поиска имени: /etc/hosts → DNS. dig ходит только в DNS, curl сначала смотрит в /etc/hosts.  
-5. ufw default deny incoming + enable без SSH: текущая сессия оборвётся, новые не подключатся, вернуть доступ можно только через консоль хостера.  
-6. Локально работает, из браузера нет: слушает 127.0.0.1; фаервол ufw; облачный фаервол/security group; неверный IP или DNS; другой порт; процесс падает/перезапускается.  
-7. 404 / 502 / 503: 404 страница не найдена; 502 прокси получил плохой ответ от бэкенда или не достучался до него; 503 сервис временно недоступен (перегрузка, обслуживание, нет живых бэкендов).  
+
+1. Отличие - 127.0.0.1 и 0.0.0.0: первый слушает только локально, второй на всех адресах машины (доступен снаружи).
+2. Refused и timeout: refused это быстрый отказ, на порту никто не слушает (или слушает другой адрес); timeout это тишина, чаще всего фаервол или недоступный адрес.
+3. TCP и UDP: TCP с соединением и гарантией (SSH, HTTPS); UDP без гарантий и быстро (DNS, VPN/WireGuard).
+4. Порядок поиска имени: /etc/hosts → DNS. dig ходит только в DNS, curl сначала смотрит в /etc/hosts.
+5. ufw default deny incoming + enable без SSH: текущая сессия оборвётся, новые не подключатся, вернуть доступ можно только через консоль хостера.
+6. Локально работает, из браузера нет: слушает 127.0.0.1; фаервол ufw; облачный фаервол/security group; неверный IP или DNS; другой порт; процесс падает/перезапускается.
+7. 404 / 502 / 503: 404 страница не найдена; 502 прокси получил плохой ответ от бэкенда или не достучался до него; 503 сервис временно недоступен (перегрузка, обслуживание, нет живых бэкендов).
 
 ## Что было непонятно
