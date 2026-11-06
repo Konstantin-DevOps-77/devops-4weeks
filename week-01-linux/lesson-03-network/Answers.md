@@ -217,8 +217,17 @@ ufw allow 8443/tcp
 
 ## OPS-302  
 - **Симптом:**  
+Сайт на 8301 не открывается снаружи  
 - **Влияние:**  
+Сервис недоступен.    
 - **Диагностика:**  
+Проверяем статус сервиса:  
+`systemctl status ops301-web`
+Вывод:  
+ops301-web.service - OPS-301 shop frontend  
+     Loaded: loaded (/etc/systemd/system/ops301-web.service; enabled; preset: enabled)  
+     Active: active (running)  
+  
 - **Причина:**  
 - **Решение:**  
 - **Проверка:**  
