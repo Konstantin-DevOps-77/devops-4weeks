@@ -190,6 +190,49 @@ getent и ping используют системный резолвер, кот�
 
 ## Задание 5. Свой веб-сервер
 
+Штатная привязка(привязка "ДО")
+
+sudo ss -tlnp | grep 8080
+LISTEN 0      5            0.0.0.0:8080       0.0.0.0:*    users:(("python3",pid=1001920,fd=3)) 
+
+curl http://127.0.0.1:8080
+<h1>Kostya server</h1>
+
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8080  
+
+
+ComputerName     : 212.113.116.203  
+RemoteAddress    : 212.113.116.203  
+RemotePort       : 8080  
+InterfaceAlias   : happ-xray  
+SourceAddress    : 172.19.0.1  
+TcpTestSucceeded : True  
+
+Перепривязка на 127.0.0.1 
+python3 -m http.server 8080 --bind 127.0.0.1 --directory ~/web
+
+sudo ss -tlnp | grep 8080
+LISTEN 0      5          127.0.0.1:8080       0.0.0.0:*    users:(("python3",pid=1015058,fd=3))                       
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-03-network# curl http://127.0.0.1:8080
+<h1>Kostya server</h1>
+
+Внешний доступ:
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8080
+
+
+ComputerName     : 212.113.116.203
+RemoteAddress    : 212.113.116.203
+RemotePort       : 8080
+InterfaceAlias   : happ-xray
+SourceAddress    : 172.19.0.1
+TcpTestSucceeded : True
+
+НО!
+Сайт работает внутри!
+Прямого внешнего доступа по публичному IP:8080 нет
+Страница возвращает Empty responce. 
+
+
 ## Задание 6. Фаервол
 Команда:  
 `sudo ufw status verbose`  
@@ -205,6 +248,9 @@ ufw allow 443/tcp
 ufw allow 443/udp  
 ufw allow 37363/tcp    
 ufw allow 8443/tcp  
+
+sudo ufw allow 22/tcp             SSH 
+sudo ufw allow Порт VPN/udp    # AmneziaWG
 
 ## OPS-301
 - **Симптом:**  
