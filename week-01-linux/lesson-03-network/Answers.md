@@ -348,8 +348,31 @@ getent hosts status.ops.lab                  # 127.0.0.1
 - **Влияние:**  
 Новая версия запускается, но через пару секунд падает в failed.  
 - **Диагностика:**  
+1. Проверяем статус службы"
+`systemctl status ops303-api` 
+ops303-api.service - OPS-303 API v2  
+     Loaded: loaded (/etc/systemd/system/ops303-api.service; enabled; preset: enabled)  
+     Active: failed (Result: exit-code)  
+2. Смотрим лог:
+`journalctl -u ops303-api -n 50 --no-pager`
+ops303-api.service: Main process exited, code=exited, status=1/FAILURE  
+ops303-api.service: Failed with result 'exit-code'.  
+3. Проверяем, кто держит порт:
+`sudo ss -tlnp | grep 8303`
+LISTEN 0      5            0.0.0.0:8303       0.0.0.0:*    users:(("python3",pid=1007022,fd=3))  
+4. Смотрим, что за процесс.
+ `ps -fp 1007022`
+ UID          PID    PPID  C STIME TTY          TIME CMD
+root     1007022 1007020  0 12:28 ?        00:00:00 /usr/bin/python3 -m http.server 8303
+5. Проверяем, откуда запущен:
+`sudo ls -l /proc/1007022/cwd`
+/proc/1007022/cwd -> /opt/ops303/old
+6. Проверяем curl на порту
+curl http://127.0.0.1:8303/
+api v1 (old)
 
 - **Причина:**
+порт 8303 занят «осиротевшим» старым процессом, запущенным вручную вне systemd. Новая служба не может занять порт и падает. Откатывать релиз не нужно.
 - **Решение:**
 - **Проверка:**
 - **Профилактика:**
