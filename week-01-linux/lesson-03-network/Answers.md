@@ -191,7 +191,21 @@ getent и ping используют системный резолвер, кот�
 ## Задание 5. Свой веб-сервер
 
 ## Задание 6. Фаервол
-
+Команда:
+`sudo ufw status verbose`
+Вывод:
+active.
+Команда:
+`sudo ufw show added` 
+Вывод:
+Added user rules (see 'ufw status' for running firewall):  
+ufw allow 22/tcp  
+ufw allow 80/tcp  
+ufw allow 443/tcp  
+ufw allow 443/udp  
+ufw allow 37363/tcp    
+ufw allow 8443/tcp  
+  
 ## OPS-301
 - **Симптом:**
 - **Влияние:**
