@@ -292,12 +292,42 @@ TcpTestSucceeded : True
 ## OPS-302  
 - **Симптом:**  
 Мониторинг не видит статус сервиса
-- **Влияние:**
+- **Влияние:**  
 Нет доступа - connection refused 
 - **Диагностика:**
-
-- **Причина:**
-- **Решение:**
+1. Проверяем статус сервиса:
+`systemctl status ops302-status` 
+systemctl status ops302-status
+● ops302-status.service - OPS-302 status endpoint  
+     Loaded: loaded (/etc/systemd/system/ops302-status.service; enabled; preset: enabled)  
+     Active: active (running)  
+2. Проверяем Listen:
+`sudo ss -tlnp | grep 8302`  
+LISTEN 0      5          127.0.0.1:8302       0.0.0.0:*    users:(("python3",pid=1005772,fd=3))  
+3. Смотрим curl на порту:
+`curl -v http://status.ops.lab:8302/`
+* connect to 127.0.0.2 port 8302 from 127.0.0.1 port 38418 failed: Connection refused  
+4. Проверям куда идет приложение:
+`getent hosts status.ops.lab`  
+127.0.0.2       status.ops.lab  
+5. Проверям dig
+`dig +short status.ops.lab`  
+Пусто - dig не читает /etc/hosts
+6. Смотрим, что в etc/hosts
+`grep status /etc/hosts`  
+# status endpoint, перенесли при переезде  
+127.0.0.2 status.ops.lab  
+- **Причина:**  
+запись в /etc/hosts указывает имя на 127.0.0.2, а служба слушает только 127.0.0.1.   
+Весь диапазон 127.0.0.0/8 это loopback, но слушатель привязан именно к 127.0.0.1, так что на 127.0.0.2 никого нет → поэтому refused.  
+- **Решение:** 
+Меняем запись:
+``` 
+sudo cp /etc/hosts /etc/hosts.ops302.bak
+sudo sed -i 's/^127\.0\.0\.2 status\.ops\.lab/127.0.0.1 status.ops.lab/' /etc/hosts
+getent hosts status.ops.lab                  # 127.0.0.1
+``` 
+127.0.0.1       status.ops.lab
 - **Проверка:**
 - **Профилактика:** 
 
