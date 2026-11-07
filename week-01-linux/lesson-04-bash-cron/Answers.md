@@ -3,14 +3,15 @@
 
 ## Задание 1. Первые скрипты
 
-# hello.sh
+### hello.sh
 
-```
-#!/bin/bash  
-echo "Привет, $USER! Сейчас $(date +%H:%M)"  
-```
-s
-# greeting.sh
+`#!/bin/bash`  
+`echo "Привет, $USER! Сейчас $(date +%H:%M)"`  
+
+
+### greeting.sh
+
+
 
 ## Задание 2. Кавычки
 
