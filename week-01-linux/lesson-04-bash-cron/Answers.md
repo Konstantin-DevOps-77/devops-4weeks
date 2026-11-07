@@ -1,8 +1,16 @@
 
-````markdown
 # Урок 4. Bash и cron
 
 ## Задание 1. Первые скрипты
+
+# hello.sh
+
+```
+#!/bin/bash  
+echo "Привет, $USER! Сейчас $(date +%H:%M)"  
+```
+s
+# greeting.sh
 
 ## Задание 2. Кавычки
 
