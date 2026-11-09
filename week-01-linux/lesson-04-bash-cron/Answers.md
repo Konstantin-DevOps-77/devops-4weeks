@@ -182,25 +182,24 @@ OK mem 998MB available
 OK ssh active  
 код: 1  
   
-## Задание 5. cron
-- Часовой пояс:
+## Задание 5. cron  
+- Часовой пояс:  
+  
+`timedatectl show -p Timezone`  
+`date '+%Y-%m-%d %H:%M:%S %Z'`  
+`TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S %Z'`  
+  
+Вывод:  
+Timezone=Etc/UTC  
+2026-11-09 13:35:16 UTC  
+2026-11-09 16:35:16 MSK  
 
-`timedatectl show -p Timezone`
-`date '+%Y-%m-%d %H:%M:%S %Z'`
-`TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S %Z'`
+- PATH у меня(добавляем в планировщик):  
+* * * * * /home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1  
 
-Вывод.
-Timezone=Etc/UTC
-2026-11-09 13:35:16 UTC
-2026-11-09 16:35:16 MSK
-
-
-- PATH у меня(добавляем в планировщик):
-* * * * * /home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1
-
-Проверка(3 минуты)  
-`tail -n 12 ~/health.log`
-`sudo journalctl -u cron --since "5 min ago" | tail`
+Проверка(3 минуты):  
+`tail -n 12 ~/health.log`  
+`sudo journalctl -u cron --since "5 min ago" | tail`  
 
 2026-11-09 14:00:01 OK disk 51%
 2026-11-09 14:00:01 OK mem 943MB available
@@ -215,7 +214,7 @@ Nov 09 14:02:01 blank-black.ptr.network CRON[1063517]: (kostya) CMD (/home/kosty
 Nov 09 14:02:01 blank-black.ptr.network CRON[1063513]: (CRON) info (No MTA installed, discarding output)
 Nov 09 14:02:01 blank-black.ptr.network CRON[1063513]: pam_unix(cron:session): session closed for user kostya
 
-Правильно: в логе блоки из трёх строк раз в минуту, в журнале строки CMD (/home/.../health.sh >> ...).  
+В логе блоки из трёх строк раз в минуту, в журнале строки CMD (/home/.../health.sh >> ...).  
 
 
 - PATH у cron:
