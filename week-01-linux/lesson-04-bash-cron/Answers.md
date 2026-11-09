@@ -273,7 +273,7 @@ tar: : Cannot open: No such file or directory
 tar: Error is not recoverable: exiting now
 backup done
 
-1. source ./backup.conf относительный путь. Cron запускает задачу из домашнего каталога (/root), а не из /opt/ops401, поэтому конфиг не найден. Руками «работало», потому что Андрей сначала делал cd /opt/ops401.
+1. source ./backup.conf относительный путь. Cron запускает задачу из домашнего каталога (/root), а не из /opt/ops401, поэтому конфиг не найден. Руками «работало», потому что Андрей сначала делал cd /opt/ops401. То есть мы запускаемся из "неправильного" каталога.
 2. packit лежит в /usr/local/bin, а у cron PATH=/usr/bin:/bin. У sudo же есть secure_path, включающий /usr/local/bin, поэтому у Андрея руками находилось.
 3. Скрипт без set -e и без проверок, а последняя команда echo "backup done" всегда успешна, поэтому код возврата 0 и сообщение «готово» при провале(в этом и есть ловушка) - у нас нет корректного уведомления об ошибках.  
 
@@ -312,7 +312,7 @@ log "backup done: $ARCHIVE"
 Обновление  crontab:
 
 PATH=/usr/local/bin:/usr/bin:/bin
-*/2 * * * * root /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
+*/2 * * * * /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
 
 - **Проверка:**
 `ls -l /opt/ops401/backups`
@@ -321,15 +321,26 @@ PATH=/usr/local/bin:/usr/bin:/bin
 `sudo journalctl -u cron --since "5 min ago" | grep ops401`
 
 root@blank-black:/opt/ops401/backups# ls -l /opt/ops401/backups
-total 4
--rwxr-xr-x 1 root root 611 Nov  9 11:10 backup.sh
+total 24
+-rw-r--r-- 1 root root 209 Nov  9 14:22 data-2026-11-09-1422.tar.gz
+-rw-r--r-- 1 root root 209 Nov  9 14:24 data-2026-11-09-1424.tar.gz
+-rw-r--r-- 1 root root 209 Nov  9 14:26 data-2026-11-09-1426.tar.gz
+-rw-r--r-- 1 root root 209 Nov  9 14:28 data-2026-11-09-1428.tar.gz
+-rw-r--r-- 1 root root 209 Nov  9 14:30 data-2026-11-09-1430.tar.gz
+
+`tar -tzf /opt/ops401/backups/data-2026-11-09-1428.tar.gz`
+./
+./orders.txt
+./clients.txt
+
 
 Каждые 2 минуты пишется:
 sudo journalctl -u cron --since "5 min ago" | grep ops401
-Nov 09 11:10:01 blank-black.ptr.network CRON[1045864]: (root) CMD (/opt/ops401/backup.sh)
-Nov 09 11:10:01 blank-black.ptr.network CRON[1045868]: (root) CMD (/opt/ops401/backup.sh >> /tmp/ops401-debug.log 2>&1)
-Nov 09 11:12:01 blank-black.ptr.network CRON[1046347]: (root) CMD (/opt/ops401/backup.sh)
-Nov 09 11:12:01 blank-black.ptr.network CRON[1046348]: (root) CMD (/opt/ops401/backup.sh >> /tmp/ops401-debug.log 2>&1)
+root@blank-black:/home/kostya# sudo journalctl -u cron --since "5 min ago" | grep ops401
+Nov 09 14:26:01 blank-black.ptr.network CRON[1069999]: (root) CMD (/opt/ops401/backup.sh)
+Nov 09 14:26:01 blank-black.ptr.network CRON[1070001]: (root) CMD (/opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1)
+Nov 09 14:28:01 blank-black.ptr.network CRON[1070810]: (root) CMD (/opt/ops401/backup.sh)
+Nov 09 14:28:01 blank-black.ptr.network CRON[1070813]: (root) CMD (/opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1)
 
 
 
