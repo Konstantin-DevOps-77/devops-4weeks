@@ -5,11 +5,21 @@
 
 1. 
 ### hello.sh
+```bash
+#!/bin/bash
+echo "Привет, $USER! Сейчас $(date +%H:%M)"
+```
 
-
-
-
-
+### greet.sh
+```bash
+#!/bin/bash
+# greet.sh
+if [ $# -lt 1 ]; then
+  echo "Использование: $0 <имя>" >&2
+  exit 1
+fi
+echo "Привет, $1"
+```
 
 3. 
 Команда:
@@ -242,7 +252,7 @@ backup done
 **Решение:**
 
 Обновленный файл backup.sh  
-
+/hom
 ```bash
 #!/bin/bash
 set -euo pipefail
