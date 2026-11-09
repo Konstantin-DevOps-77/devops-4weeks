@@ -248,18 +248,18 @@ PATH (cron)=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/ga
 - **Влияние:**  
 Невозможно откатить систему.  
 - **Диагностика:**  
-# пусто
-ls -l /opt/ops401/backups
-total 0  
+Пусто  
+`ls -l /opt/ops401/backups`  
+total 0    
 
-# Проверяем журнал и что задание есть
-sudo journalctl -u cron --since "10 min ago" | grep ops401 | tail
- blank-black.ptr.network CRON[1045133]: (root) CMD (/opt/ops401/backup.sh)   
+Проверяем журнал и что задание есть  
+`sudo journalctl -u cron --since "10 min ago" | grep ops401 | tail`
+blank-black.ptr.network CRON[1045133]: (root) CMD (/opt/ops401/backup.sh)   
 
-cat /etc/cron.d/ops401   
+`cat /etc/cron.d/ops401`   
 */2 * * * * root /opt/ops401/backup.sh  
 
-- **Причина:**  
+**Причина:**  
 oot@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# cat /tmp/ops401-debug.log
 /opt/ops401/backup.sh: line 2: ./backup.conf: No such file or directory
 tar: : Cannot open: No such file or directory
@@ -269,7 +269,6 @@ backup done
 1. source ./backup.conf относительный путь. Cron запускает задачу из домашнего каталога (/root), а не из /opt/ops401, поэтому конфиг не найден. Руками «работало», потому что Андрей сначала делал cd /opt/ops401. То есть мы запускаемся из "неправильного" каталога.
 2. packit лежит в /usr/local/bin, а у cron PATH=/usr/bin:/bin. У sudo же есть secure_path, включающий /usr/local/bin, поэтому у Андрея руками находилось.
 3. Скрипт без set -e и без проверок, а последняя команда echo "backup done" всегда успешна, поэтому код возврата 0 и сообщение «готово» при провале(в этом и есть ловушка) - у нас нет корректного уведомления об ошибках.  
-
 
 **Решение:**
 
