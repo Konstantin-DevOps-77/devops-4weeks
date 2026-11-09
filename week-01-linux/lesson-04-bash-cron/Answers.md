@@ -48,8 +48,6 @@ echo "Привет, $USER! Сейчас $(date +%H:%M)"
 Вывод:  
 2
 
-
-
 ## Задание 3. Коды возврата
 1. 
 Команда:
@@ -91,7 +89,55 @@ cat №2 - код 1
 
 ## Задание 4. health.sh
 Скрипт: scripts/health.sh
+```bash 
+#!/bin/bash
+# health.sh [порог_диска_в_%]  — проверка диска, памяти и ssh
+set -euo pipefail
+
+THRESHOLD="${1:-80}"        # аргумент или 80 по умолчанию
+MIN_MEM_MB=200
+fail=0                      # станет 1, если хоть одна проверка провалилась
+
+log() {
+  echo "$(date '+%F %T') $*"
+}
+
+# Порог должен быть числом, иначе сравнение ниже сломается
+if ! [[ "$THRESHOLD" =~ ^[0-9]+$ ]]; then
+  echo "Использование: $0 [порог_в_процентах]" >&2
+  exit 2
+fi
+
+# 1. Диск
+disk=$(df --output=pcent / | tail -1 | tr -dc '0-9')
+if [ "$disk" -le "$THRESHOLD" ]; then
+  log "OK disk ${disk}%"
+else
+  log "FAIL disk ${disk}% > ${THRESHOLD}%"
+  fail=1
+fi
+
+# 2. Память (колонка available в free -m)
+mem=$(free -m | awk '/^Mem:/ {print $7}')
+if [ "$mem" -ge "$MIN_MEM_MB" ]; then
+  log "OK mem ${mem}MB available"
+else
+  log "FAIL mem ${mem}MB available < ${MIN_MEM_MB}MB"
+  fail=1
+fi
+
+# 3. Служба ssh
+if systemctl is-active --quiet ssh; then
+  log "OK ssh active"
+else
+  log "FAIL ssh not active"
+  fail=1
+fi
+
+exit "$fail"
+
 ```
+
 вывод ./health.sh и код 0(вывод корректен - все проверки пройдены штатно)
 ./health.sh;    echo "код: $?"
 OK disk 51%
@@ -105,7 +151,6 @@ FAIL disk 51% > 1%
 OK mem 998MB available
 OK ssh active
 код: 1
-
 
 ## Задание 5. cron
 - Часовой пояс:
