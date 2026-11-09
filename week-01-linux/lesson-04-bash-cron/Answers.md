@@ -201,8 +201,8 @@ Timezone=Etc/UTC
 2026-11-09 16:35:16 MSK
 
 
-- PATH у меня:
-* * * * * /home/ТВОЙ_ПОЛЬЗОВАТЕЛЬ/scripts/health.sh >> /home/ТВОЙ_ПОЛЬЗОВАТЕЛЬ/health.log 2>&1
+- PATH у меня(добавляем в планировщик):
+* * * * * /home/kostya/projects/devops-4week/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1
 
 Проверка(3 минуты)  
 `tail -n 12 ~/health.log`
