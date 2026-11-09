@@ -240,9 +240,9 @@ backup done
 2. packit лежит в /usr/local/bin, а у cron PATH=/usr/bin:/bin. У sudo же есть secure_path, включающий /usr/local/bin, поэтому у Андрея руками находилось.
 3. Скрипт без set -e и без проверок, а последняя команда echo "backup done" всегда успешна, поэтому код возврата 0 и сообщение «готово» при провале(в этом и есть ловушка)
 **Решение:**
+
 Обновленный файл backup.sh  
 
-```  
 ```bash
 #!/bin/bash
 set -euo pipefail
