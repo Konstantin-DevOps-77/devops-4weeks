@@ -349,29 +349,28 @@ Nov 09 14:28:01 blank-black.ptr.network CRON[1070813]: (root) CMD (/opt/ops401/b
 `tail -n 20 /var/log/ops402.log`
 root@blank-black:/opt/ops401# tail -n 20 /var/log/ops402.log
 cat: '/opt/ops402/data/*.csv': No such file or directory
-2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz
-После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет!!!)  
-+ ловушка конвейера о якобы "успехе"  
-
-`grep -v ': /opt' /var/log/ops402.log | head`  
-2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz
-root@blank-black:/opt/ops401# grep -v ': /opt' /var/log/ops402.log | head
-cat: '/opt/ops402/data/*.csv': No such file or directory
-cat: '/opt/ops402/data/*.csv': No such file or directory
-Лог отсутствует.  
+2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz  
+После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет!!!)    
++ ловушка конвейера о якобы "успехе"    
   
-`zcat /opt/ops402/out/export-*.csv.gz`
-Пусто  
+`grep -v ': /opt' /var/log/ops402.log | head`    
+2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz  
+root@blank-black:/opt/ops401# grep -v ': /opt' /var/log/ops402.log | head  
+cat: '/opt/ops402/data/*.csv': No such file or directory  
+cat: '/opt/ops402/data/*.csv': No such file or directory  
+Лог отсутствует.      
+  
+`zcat /opt/ops402/out/export-*.csv.gz`  
+Пусто      
+  
+`ls /opt/ops402/ /opt/ops402/incoming/`    
+/opt/ops402/:  
+export.sh  incoming  out  
 
-
-`ls /opt/ops402/ /opt/ops402/incoming/`  
-/opt/ops402/:
-export.sh  incoming  out
-
-/opt/ops402/incoming/:
-clients.csv  sales.csv
-
-Каталога data нет, CSV лежат в incoming
+/opt/ops402/incoming/:  
+clients.csv  sales.csv  
+  
+Каталога data нет, CSV лежат в incoming  
 
 
 - **Причина:**  
