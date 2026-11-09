@@ -202,14 +202,26 @@ Timezone=Etc/UTC
 
 
 - PATH у меня(добавляем в планировщик):
-* * * * * /home/kostya/projects/devops-4week/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1
+* * * * * /home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1
 
 Проверка(3 минуты)  
 `tail -n 12 ~/health.log`
 `sudo journalctl -u cron --since "5 min ago" | tail`
 
+2026-11-09 14:00:01 OK disk 51%
+2026-11-09 14:00:01 OK mem 943MB available
+2026-11-09 14:00:01 OK ssh active
+2026-11-09 14:01:01 OK disk 51%
+2026-11-09 14:01:01 OK mem 958MB available
+2026-11-09 14:01:01 OK ssh active
+
+
+Nov 09 14:02:01 blank-black.ptr.network CRON[1063517]: (kostya) CMD (/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts/health.sh >> /home/kostya/health.log 2>&1)
+
+Nov 09 14:02:01 blank-black.ptr.network CRON[1063513]: (CRON) info (No MTA installed, discarding output)
+Nov 09 14:02:01 blank-black.ptr.network CRON[1063513]: pam_unix(cron:session): session closed for user kostya
+
 Правильно: в логе блоки из трёх строк раз в минуту, в журнале строки CMD (/home/.../health.sh >> ...).  
- Если журнал пустой без sudo, это права доступа, а не отсутствие запусков.
 
 
 - PATH у cron:
@@ -220,7 +232,15 @@ Timezone=Etc/UTC
 `env | wc -l ; wc -l < /tmp/cron-env.txt`
 `grep ^PATH= /tmp/cron-env.txt ; echo "$PATH"`
 
-- PATH у меня:
+HOME=/root
+LOGNAME=root
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LANG=en_US.UTF-8
+SHELL=/bin/sh
+PWD=/root
+14
+Мой PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH (cron)=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 
 - Расписания:  
 */15 * * * *   /путь/требуемая_команда        # каждые 15 минут  
