@@ -448,44 +448,44 @@ id,sum
 5. Запись через временный файл;  
 6. мониторинг не только «задача запустилась», но и «результат не пуст» (например, ненулевой размер архива и актуальная дата).  
   
-## OPS-403
-- **Симптом:**  
-Не хватает части данных  
-- **Влияние:**  
-Часть данных переносится, часть нет. Появляется сообщение, что данные archived
-- **Диагностика:**  
-`ls -1 /opt/ops403/reports`
-'plan 2027 final.txt'   
-'Q3 report.txt'    
+## OPS-403  
+- **Симптом:**    
+Не хватает части данных    
+- **Влияние:**    
+Часть данных переносится, часть нет. Появляется сообщение, что данные archived.  
+- **Диагностика:**    
+`ls -1 /opt/ops403/reports`  
+'plan 2027 final.txt'     
+'Q3 report.txt'      
+salary.txt    
+sales.txt    
+  
+`sudo /opt/ops403/archive.sh; echo "код: $?"`  
+mv: cannot stat 'plan': No such file or directory  
+mv: cannot stat '2027': No such file or directory  
+mv: cannot stat 'final.txt': No such file or directory  
+mv: cannot stat 'Q3': No such file or directory  
+mv: cannot stat 'report.txt': No such file or directory  
+archived  
+код: 0   
+  
+`ls -1 /opt/ops403/reports /opt/ops403/archive`  
+/opt/ops403/archive:  
 salary.txt  
 sales.txt  
-
-`sudo /opt/ops403/archive.sh; echo "код: $?"`
-mv: cannot stat 'plan': No such file or directory
-mv: cannot stat '2027': No such file or directory
-mv: cannot stat 'final.txt': No such file or directory
-mv: cannot stat 'Q3': No such file or directory
-mv: cannot stat 'report.txt': No such file or directory
-archived
-код: 0 
-
-`ls -1 /opt/ops403/reports /opt/ops403/archive`
-/opt/ops403/archive:
-salary.txt
-sales.txt
-
-/opt/ops403/reports:
-'plan 2027 final.txt'
-'Q3 report.txt'
-
-- **Причина:**    
-1. for f in $(ls): вывод ls режется по пробелам, Q3 report.txt превращается в два «файла» Q3 и report.txt, а plan 2027 final.txt в три.(проблема кавычек).в скрипте for f in $(ls); do rm $f; done файл с именем * важное.txt дал бы слова * и важное.txt  
-2. mv $f ... без кавычек: даже если бы имя дошло целиком, оно снова разрезалось бы.  
-3. Нет set -e и проверки результата mv, а финальный echo "archived" всегда успешен: сообщение «готово» и код 0 при провале.    
-
-- **Решение:**  
-Обновленный файл 
-
+  
+/opt/ops403/reports:  
+'plan 2027 final.txt'  
+'Q3 report.txt'  
+  
+- **Причина:**      
+1. for f in $(ls): вывод ls режется по пробелам, Q3 report.txt превращается в два «файла» Q3 и report.txt, а plan 2027 final.txt в три.(проблема кавычек).в скрипте for f in $(ls); do rm $f; done файл с именем * важное.txt дал бы слова * и важное.txt.    
+2. mv $f ... без кавычек: даже если бы имя дошло целиком, оно снова разрезалось бы.    
+3. Нет set -e и проверки результата mv, а финальный echo "archived" всегда успешен: сообщение «готово» и код 0 при провале.      
+  
+- **Решение:**    
+Обновленный файл   
+  
 ```bash 
 #!/bin/bash
 set -euo pipefail
@@ -510,84 +510,81 @@ done
 
 echo "archived: $count files"
 
-```
-- **Проверка:**
-#Проверили архивацию
-root@blank-black:/opt/ops403# sudo /opt/ops403/archive.sh; echo "код: $?"
+```  
+- **Проверка:**  
+#Проверили архивацию 
+`sudo /opt/ops403/archive.sh; echo "код: $?"`
 archived: 2 files
 код: 0
 
 #Смотрим в репортс(пусто)
-root@blank-black:/opt/ops403# ls -1 /opt/ops403/reports
+`ls -1 /opt/ops403/reports`
 
 #Теперь все файлы на месте(archive)
-root@blank-black:/opt/ops403# ls -1 /opt/ops403/archive
+`ls -1 /opt/ops403/archive`
 'plan 2027 final.txt'
 'Q3 report.txt'
 salary.txt
 sales.txt
 
-- **Что было бы с rm:**
-Вывод.
-В скрипте for f in $(ls); do rm $f; done файл с именем * важное.txt дал бы слова * и важное.txt. Звёздочка без кавычек раскрывается bash в имена всех файлов текущего каталога, поэтому rm * УДАЛИЛ БЫ ВСЕ СОДЕРЖИМОЕ КАТАЛОГА, включая важные отчёты, и без корзины, безвозвратно. Слово важное.txt дополнительно дало бы ошибку «нет такого файла», а скрипт всё равно написал бы «готово».
-
-- **Профилактика:**
-1. шаблон скрипта со строгим режимом; 
-2. Тестовые файлы с пробелами, * и кириллицей в именах как обязательная часть теста.
-
-## OPS-404
- **Симптом:**  
-Дублируются отчеты 
-- **Влияние:**  
-Время обработки увеличено -> нагрузка на систему возросла
-- **Диагностика:** 
-
-#Пересечение и дублирование отчетов
-`cat /var/log/ops404.log`
-2026-11-09 12:20:01 start pid=1051492
-2026-11-09 12:21:01 start pid=1051722
-2026-11-09 12:21:31 end   pid=1051492
-2026-11-09 12:22:01 start pid=1051758
-
-`ps -eo pid,lstart,cmd | grep '[r]eport.sh'`
-1051845 Mon Nov  9 12:23:01 2026 /bin/sh -c /opt/ops404/report.sh >> /var/log/ops404.log 2>&1
-1051849 Mon Nov  9 12:23:01 2026 /bin/bash /opt/ops404/report.sh
-
-`pgrep -af report.sh`
-1051890 /bin/sh -c /opt/ops404/report.sh >> /var/log/ops404.log 2>&1
-1051895 /bin/bash /opt/ops404/report.sh
-
-`grep -v ': /opt' /var/log/ops402.log | head`  
-2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz
-root@blank-black:/opt/ops401# grep -v ': /opt' /var/log/ops402.log | head
-cat: '/opt/ops402/data/*.csv': No such file or directory
-cat: '/opt/ops402/data/*.csv': No such file or directory
-Лог отсутствует.  
+- **Что было бы с rm:**  
+В скрипте for f in $(ls); do rm $f; done файл с именем * важное.txt дал бы слова * и важное.txt. Звёздочка без кавычек раскрывается bash в имена всех файлов текущего каталога, поэтому rm * УДАЛИЛ БЫ ВСЕ СОДЕРЖИМОЕ КАТАЛОГА, включая важные отчёты, и без корзины, безвозвратно. Слово важное.txt дополнительно дало бы ошибку «нет такого файла», а скрипт всё равно написал бы «готово».  
   
-`zcat /opt/ops402/out/export-*.csv.gz`
-Пусто  
+- **Профилактика:**  
+1. шаблон скрипта со строгим режимом;   
+2. Тестовые файлы с пробелами, * и кириллицей в именах как обязательная часть теста.  
 
+## OPS-404  
+ **Симптом:**    
+Дублируются отчеты   
+- **Влияние:**    
+Время обработки увеличено -> нагрузка на систему возросла 
+   
+- **Диагностика:**   
+  
+#Пересечение и дублирование отчетов  
+`cat /var/log/ops404.log`  
+2026-11-09 12:20:01 start pid=1051492  
+2026-11-09 12:21:01 start pid=1051722  
+2026-11-09 12:21:31 end   pid=1051492  
+2026-11-09 12:22:01 start pid=1051758  
 
-`ls /opt/ops402/ /opt/ops402/incoming/`  
-/opt/ops402/:
-export.sh  incoming  out
+`ps -eo pid,lstart,cmd | grep '[r]eport.sh'`  
+1051845 Mon Nov  9 12:23:01 2026 /bin/sh -c /opt/ops404/report.sh >> /var/log/ops404.log 2>&1  
+1051849 Mon Nov  9 12:23:01 2026 /bin/bash /opt/ops404/report.sh  
 
-/opt/ops402/incoming/:
-clients.csv  sales.csv
+`pgrep -af report.sh`  
+1051890 /bin/sh -c /opt/ops404/report.sh >> /var/log/ops404.log 2>&1  
+1051895 /bin/bash /opt/ops404/report.sh  
+  
 
-Каталога data нет, CSV лежат в incoming
+`grep -v ': /opt' /var/log/ops402.log | head`
+cat: '/opt/ops402/data/*.csv': No such file or directory  
+cat: '/opt/ops402/data/*.csv': No such file or directory  
+Лог отсутствует.    
+  
+`zcat /opt/ops402/out/export-*.csv.gz`  
+Пусто    
 
+`ls /opt/ops402/ /opt/ops402/incoming/`    
+/opt/ops402/:  
+export.sh  incoming  out  
+  
+/opt/ops402/incoming/:  
+clients.csv  sales.csv  
+  
+Каталога data нет, CSV лежат в incoming  
 
-- **Причина:**  
-1. После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет).
-2. Классическая ловушка конвейера: cat ... | gzip без pipefail; код конвейера = код gzip = 0.
-3. Проверка if [ $? -eq 0 ] смотрит на этот ложный нуль, поэтому пишет «OK».
-4. Ветка FAIL не делает exit с ненулевым кодом, значит даже честный «FAIL» выглядел бы для cron как успех.
-5. >"$OUT" создаёт (обнуляет) итоговый файл до обработки, поэтому при ошибке остаётся пустой «архив». Он ещё и выглядит как успешный результат.  
-
-- **Решение:**
-Обновленный файл backup.sh  
-
+- **Причина:**    
+1. После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет).  
+2. Классическая ловушка конвейера: cat ... | gzip без pipefail; код конвейера = код gzip = 0.  
+3. Проверка if [ $? -eq 0 ] смотрит на этот ложный нуль, поэтому пишет «OK».  
+4. Ветка FAIL не делает exit с ненулевым кодом, значит даже честный «FAIL» выглядел бы для cron как успех.  
+5. >"$OUT" создаёт (обнуляет) итоговый файл до обработки, поэтому при ошибке остаётся пустой «архив». Он ещё и выглядит как успешный результат.    
+  
+- **Решение:**  
+Обновленный файл backup.sh    
+  
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -613,49 +610,49 @@ trap 'rm -f "$TMP"' EXIT
 mv "$TMP" "$ARCHIVE"
 log "backup done: $ARCHIVE"
 
-```
+```  
+  
+Обновление  crontab:  
 
-Обновление  crontab:
+PATH=/usr/local/bin:/usr/bin:/bin  
+*/2 * * * * root /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1  
+  
+- **Проверка:**  
 
-PATH=/usr/local/bin:/usr/bin:/bin
-*/2 * * * * root /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
+#Правильно начинаются и заканчиваются без пересечений  
+  
+`cat /var/log/ops404.log`
+2026-11-09 12:31:01 start pid=1052765  
+2026-11-09 12:32:31 end   pid=1052765  
+2026-11-09 12:33:01 start pid=1052953  
 
-- **Проверка:**
+#Перехват флоком.  
 
-#Правильно начинаются и заканчиваются без пересечений
+root@blank-black:/opt/ops404# pgrep -af report.sh  
+1053130 /bin/sh -c /usr/bin/flock -n /run/lock/ops404.lock /opt/ops404/report.sh >> /var/log/ops404.log 2>&1  
+1053132 /usr/bin/flock -n /run/lock/ops404.lock /opt/ops404/report.sh  
+1053134 /bin/bash /opt/ops404/report.sh  
+  
+- **Профилактика:**  
+1. всегда set -euo pipefail;  
+2. не проверять $? после команды, а ставить команду в if;  
+3. ненулевой код при ошибке;  
+4. проверка входных данных до начала работы(правильность и "как должно быть");  
+5. Запись через временный файл;  
+6. мониторинг не только «задача запустилась», но и «результат не пуст» (например, ненулевой размер архива и актуальная дата).  
 
-root@blank-black:/opt/ops404# cat /var/log/ops404.log
-2026-11-09 12:31:01 start pid=1052765
-2026-11-09 12:32:31 end   pid=1052765
-2026-11-09 12:33:01 start pid=1052953
-
-#Перехват флоком.
-
-root@blank-black:/opt/ops404# pgrep -af report.sh
-1053130 /bin/sh -c /usr/bin/flock -n /run/lock/ops404.lock /opt/ops404/report.sh >> /var/log/ops404.log 2>&1
-1053132 /usr/bin/flock -n /run/lock/ops404.lock /opt/ops404/report.sh
-1053134 /bin/bash /opt/ops404/report.sh
-
-- **Профилактика:**
-1. всегда set -euo pipefail;
-2. не проверять $? после команды, а ставить команду в if;
-3. ненулевой код при ошибке;
-4. проверка входных данных до начала работы(правильность и "как должно быть");
-5. Запись через временный файл;
-6. мониторинг не только «задача запустилась», но и «результат не пуст» (например, ненулевой размер архива и актуальная дата).
-
-- **Что было бы с rm:**
 
 ## Вопросы для самопроверки
 1. Shebang #!/bin/bash первая строка, указывает ядру, какой интерпретатор запускать. Без неё скрипт выполнит текущий shell (в cron это /bin/sh). Скрипт, запущенный как bash script.sh, shebang игнорирует.    
 2. 0 = успех. Все механизмы (if, &&, cron, systemd) судят по коду. Если при ошибке вернуть 0, ошибка не будет замечена, никто не узнает, что бэкап не сделан.  
 3. "$VAR" передаёт значение как одно слово; $VAR разрезается по пробелам и подвержен раскрытию *. Пример: F="Q3 report.txt"; rm $F пытается удалить Q3 и report.txt.  
 4. set -e: падение команды останавливает скрипт (cp /nope /tmp и дальше код не выполняется). set -u: необъявленная переменная это ошибка (опечатка $DESTDIR вместо $DEST_DIR). pipefail: падение любой части конвейера делает его неуспешным (cat /nope | gzip)  
-5. false | true даёт 0 (код последней команды). С pipefail даёт 1   
+5. false | true даёт 0 (код последней команды). С pipefail даёт 1.     
 6. Любые три из: урезанный PATH (команда не найдена); другой текущий каталог (относительные пути); нет .bashrc, переменных и алиасов; вывод потерян; нет права x на скрипт; CRLF; неверная часовая зона; неэкранированный % в crontab; в /etc/cron.d файл с точкой в имени или неверные права; нет пользователя в строке /etc/cron.d
 7. */15 * * * 1-5 /полный/путь/команда  
 8. flock -n /run/lock/имя.lock /полный/путь/команда
 
 
 ## Что было непонятно
-````
+1. Долго разбирался с детальной инспекцией цепочки старт процесса - РЕАЛЬНОЕ исполнение.  
+2. Закопался с кавычками, методом проб и ошибок долго тестил.  
