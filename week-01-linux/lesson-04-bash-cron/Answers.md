@@ -429,15 +429,16 @@ id,city
 id,sum  
 1,100  
 2,250  
-
-#Ложная проверка
-root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming /opt/ops402/incoming.off
-root@blank-black:/opt/ops402# sudo rm -f /opt/ops402/out/export-*.csv.gz
-root@blank-black:/opt/ops402# sudo /opt/ops402/export.sh; echo "код: $?"
-2026-11-09 11:46:15 FAIL: нет каталога /opt/ops402/incoming
-код: 1
-root@blank-black:/opt/ops402# ls /opt/ops402/out/
-root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming.off /opt/ops402/incoming
+  
+#Ложная проверка  
+  
+`sudo mv /opt/ops402/incoming /opt/ops402/incoming.off`  
+`sudo rm -f /opt/ops402/out/export-*.csv.gz`
+`sudo /opt/ops402/export.sh; echo "код: $?"`  
+2026-11-09 11:46:15 FAIL: нет каталога /opt/ops402/incoming  
+код: 1  
+`ls /opt/ops402/out/`  
+`root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming.off /opt/ops402/incoming`  
 
 - **Профилактика:**
 1. всегда set -euo pipefail;
