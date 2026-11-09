@@ -109,9 +109,25 @@ OK ssh active
 
 ## Задание 5. cron
 - Часовой пояс:
+
+Time zone - Etc/UTC(UTC, +0000)  
+ 
 - PATH у cron:
 - PATH у меня:
-- Расписания:
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# cat /tmp/cron-env.txt
+HOME=/root
+LOGNAME=root
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LANG=en_US.UTF-8
+SHELL=/bin/sh
+PWD=/root
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# env | wc -l
+33
+- Расписания:  
+*/15 * * * *   /путь/требуемая_команда        # каждые 15 минут  
+30 2 * * *     /путь/требуемая_команда        # каждый день в 02:30  
+0 18 * * 1-5   /путь/требуемая_команда        # по будням в 18:00  
+0 4 * * 0      /путь/требуемая_команда        # воскресенье, 04:00 (можно и 7)  
 
 ## OPS-401
 - **Симптом:**
