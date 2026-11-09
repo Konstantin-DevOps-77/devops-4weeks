@@ -168,20 +168,20 @@ exit "$fail"
 
 ```
 
-вывод ./health.sh и код 0(вывод корректен - все проверки пройдены штатно)
-./health.sh;    echo "код: $?"
-OK disk 51%
-OK mem 998MB available
+вывод ./health.sh и код 0(вывод корректен - все проверки пройдены штатно)  
+`./health.sh;    echo "код: $?"`
+OK disk 51%  
+OK mem 998MB available  
+OK ssh active    
+код: 0    
+      
+вывод ./health.sh 1 и код 1(намеренно нарушили проверку по диску -> FAIL DISK)    
+./health.sh 1;  echo "код: $?"  
+FAIL disk 51% > 1%  
+OK mem 998MB available  
 OK ssh active  
-код: 0  
-    
-вывод ./health.sh 1 и код 1(намеренно нарушили проверку по диску -> FAIL DISK)  
-./health.sh 1;  echo "код: $?"
-FAIL disk 51% > 1%
-OK mem 998MB available
-OK ssh active
-код: 1
-
+код: 1  
+  
 ## Задание 5. cron
 - Часовой пояс:
 
