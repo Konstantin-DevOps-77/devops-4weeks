@@ -72,12 +72,12 @@ echo "$count"
  Добавился файл "Q3 report.txt"    
 
 Проверка:  
-Создаем нужные каталоги и файлы. Пробуем запустить скрипт.
-`mkdir -p "/tmp/my reports" && touch "/tmp/my reports/a.txt" "/tmp/my reports/b c.txt"`
-`./count.sh "/tmp/my reports"`
-Вывод:  
-2
-
+Создаем нужные каталоги и файлы. Пробуем запустить скрипт.  
+`mkdir -p "/tmp/my reports" && touch "/tmp/my reports/a.txt" "/tmp/my reports/b c.txt"`  
+`./count.sh "/tmp/my reports"`  
+Вывод:    
+2  
+  
 ## Задание 3. Коды возврата
 1. 
 Команда:
