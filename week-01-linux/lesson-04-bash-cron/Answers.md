@@ -34,6 +34,32 @@ echo "Привет, $USER! Сейчас $(date +%H:%M)"
 
 
 ## Задание 2. Кавычки
+count.sh
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "Использование: $0 <каталог>" >&2
+  exit 1
+fi
+
+dir="$1"
+if [ ! -d "$dir" ]; then
+  echo "Ошибка: $dir не каталог" >&2
+  exit 1
+fi
+
+count=0
+for f in "$dir"/*; do
+  if [ -f "$f" ]; then
+    count=$((count + 1))
+  fi
+done
+echo "$count"
+
+```
+
  ls #1(без кавычек)  
  Вывод:
  Создались два файла: report.txt и Q3:    
@@ -157,17 +183,28 @@ OK ssh active
 
 Time zone - Etc/UTC(UTC, +0000)  
 
-- PATH у cron:
+
 - PATH у меня:
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# cat /tmp/cron-env.txt
-HOME=/root
-LOGNAME=root
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-LANG=en_US.UTF-8
-SHELL=/bin/sh
-PWD=/root
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# env | wc -l
-33
+* * * * * /home/ТВОЙ_ПОЛЬЗОВАТЕЛЬ/scripts/health.sh >> /home/ТВОЙ_ПОЛЬЗОВАТЕЛЬ/health.log 2>&1
+
+Проверка(3 минуты)  
+`tail -n 12 ~/health.log`
+`sudo journalctl -u cron --since "5 min ago" | tail`
+
+Правильно: в логе блоки из трёх строк раз в минуту, в журнале строки CMD (/home/.../health.sh >> ...).  
+ Если журнал пустой без sudo, это права доступа, а не отсутствие запусков.
+
+
+- PATH у cron:
+* * * * * env > /tmp/cron-env.txt
+
+через минуту
+`cat /tmp/cron-env.txt`
+`env | wc -l ; wc -l < /tmp/cron-env.txt`
+`grep ^PATH= /tmp/cron-env.txt ; echo "$PATH"`
+
+- PATH у меня:
+
 - Расписания:  
 */15 * * * *   /путь/требуемая_команда        # каждые 15 минут  
 30 2 * * *     /путь/требуемая_команда        # каждый день в 02:30  
