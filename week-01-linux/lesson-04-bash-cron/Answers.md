@@ -225,28 +225,41 @@ Nov 09 11:12:01 blank-black.ptr.network CRON[1046348]: (root) CMD (/opt/ops401/b
 - **Влияние:**  
 Отчеты аналитиков приходят пустыми  
 - **Диагностика:**  
-# пусто
- ls -l /opt/ops401/backups
-total 0  
+`tail -n 20 /var/log/ops402.log`
+root@blank-black:/opt/ops401# tail -n 20 /var/log/ops402.log
+cat: '/opt/ops402/data/*.csv': No such file or directory
+2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz
+После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет!!!)  
++ ловушка конвейера о якобы "успехе"  
 
-# Проверяем журнал и что задание есть
-sudo journalctl -u cron --since "10 min ago" | grep ops401 | tail
- blank-black.ptr.network CRON[1045133]: (root) CMD (/opt/ops401/backup.sh)   
+`grep -v ': /opt' /var/log/ops402.log | head`  
+2026-11-09 11:34:01 OK: /opt/ops402/out/export-2026-11-09.csv.gz
+root@blank-black:/opt/ops401# grep -v ': /opt' /var/log/ops402.log | head
+cat: '/opt/ops402/data/*.csv': No such file or directory
+cat: '/opt/ops402/data/*.csv': No such file or directory
+Лог отсутствует.  
+  
+`zcat /opt/ops402/out/export-*.csv.gz`
+Пусто  
 
-cat /etc/cron.d/ops401   
-*/2 * * * * root /opt/ops401/backup.sh  
+
+`ls /opt/ops402/ /opt/ops402/incoming/`  
+/opt/ops402/:
+export.sh  incoming  out
+
+/opt/ops402/incoming/:
+clients.csv  sales.csv
+
+Каталога data нет, CSV лежат в incoming
+
 
 - **Причина:**  
-oot@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux/lesson-04-bash-cron/scripts# cat /tmp/ops401-debug.log
-/opt/ops401/backup.sh: line 2: ./backup.conf: No such file or directory
-tar: : Cannot open: No such file or directory
-tar: Error is not recoverable: exiting now
-backup done
+1. После переезда данные лежат в /opt/ops402/incoming, а скрипт читает /opt/ops402/data/*.csv (каталога нет).
+2. Классическая ловушка конвейера: cat ... | gzip без pipefail; код конвейера = код gzip = 0.
+3. Проверка if [ $? -eq 0 ] смотрит на этот ложный нуль, поэтому пишет «OK».
+4. Ветка FAIL не делает exit с ненулевым кодом, значит даже честный «FAIL» выглядел бы для cron как успех.
+5. >"$OUT" создаёт (обнуляет) итоговый файл до обработки, поэтому при ошибке остаётся пустой «архив». Он ещё и выглядит как успешный результат.  
 
-Причины:
-1. source ./backup.conf относительный путь. Cron запускает задачу из домашнего каталога (/root), а не из /opt/ops401, поэтому конфиг не найден. Руками «работало», потому что Андрей сначала делал cd /opt/ops401.
-2. packit лежит в /usr/local/bin, а у cron PATH=/usr/bin:/bin. У sudo же есть secure_path, включающий /usr/local/bin, поэтому у Андрея руками находилось.
-3. Скрипт без set -e и без проверок, а последняя команда echo "backup done" всегда успешна, поэтому код возврата 0 и сообщение «готово» при провале(в этом и есть ловушка)
 - **Решение:**
 Обновленный файл backup.sh  
 
@@ -284,31 +297,34 @@ PATH=/usr/local/bin:/usr/bin:/bin
 */2 * * * * root /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
 
 - **Проверка:**
-`ls -l /opt/ops401/backups`
-`cat /opt/ops401/backup.log`
-`tar -tzf /opt/ops401/backups/data-*.tar.gz`
-`sudo journalctl -u cron --since "5 min ago" | grep ops401`
+root@blank-black:/opt/ops402# sudo /opt/ops402/export.sh; echo "код: $?"
+2026-11-09 11:45:12 OK: /opt/ops402/out/export-2026-11-09.csv.gz
+код: 0
+root@blank-black:/opt/ops402# zcat /opt/ops402/out/export-$(date +%F).csv.gz
+id,city
+1,Москва
+2,Казань
+id,sum
+1,100
+2,250
 
-root@blank-black:/opt/ops401/backups# ls -l /opt/ops401/backups
-total 4
--rwxr-xr-x 1 root root 611 Nov  9 11:10 backup.sh
-
-Каждые 2 минуты пишется:
-sudo journalctl -u cron --since "5 min ago" | grep ops401
-Nov 09 11:10:01 blank-black.ptr.network CRON[1045864]: (root) CMD (/opt/ops401/backup.sh)
-Nov 09 11:10:01 blank-black.ptr.network CRON[1045868]: (root) CMD (/opt/ops401/backup.sh >> /tmp/ops401-debug.log 2>&1)
-Nov 09 11:12:01 blank-black.ptr.network CRON[1046347]: (root) CMD (/opt/ops401/backup.sh)
-Nov 09 11:12:01 blank-black.ptr.network CRON[1046348]: (root) CMD (/opt/ops401/backup.sh >> /tmp/ops401-debug.log 2>&1)
+root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming /opt/ops402/incoming.off
+root@blank-black:/opt/ops402# sudo rm -f /opt/ops402/out/export-*.csv.gz
+root@blank-black:/opt/ops402# sudo /opt/ops402/export.sh; echo "код: $?"
+2026-11-09 11:46:15 FAIL: нет каталога /opt/ops402/incoming
+код: 1
+root@blank-black:/opt/ops402# ls /opt/ops402/out/
+root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming.off /opt/ops402/incoming
 
 
 
 - **Профилактика:**
-1. полные пути в cron(относительные не используем НИКОГДА);
-2. cd/путь от $0 в скриптах;
-3. Устанавливаем set -euo pipefail(чтобы не было ложных "успехов");
-4. Всегда пишем лог с датами;
-5. мониторинг «свежести» бэкапа (например, «нет архива новее 25 часов → тревога с уведомлением»); 
-6. регулярный тест восстановления на актуальную дату.
+1. всегда set -euo pipefail;
+2. не проверять $? после команды, а ставить команду в if;
+3. ненулевой код при ошибке;
+4. проверка входных данных до начала работы(правильность и "как должно быть");
+5. Запись через временный файл;
+6. мониторинг не только «задача запустилась», но и «результат не пуст» (например, ненулевой размер архива и актуальная дата).
 
 ## OPS-403
 (те же пункты)
