@@ -38,9 +38,14 @@ echo "Привет, $USER! Сейчас $(date +%H:%M)"
  Создались два файла: report.txt и Q3:  
 
  ls #2(с кавычками):
- Добавился файл "Q3 report.txt"  
+ Добавился файл "Q3 report.txt" cd  
    
-
+Проверка:  
+Создаем нужные каталоги и файлы. Пробуем запустить скрипт.
+`mkdir -p "/tmp/my reports" && touch "/tmp/my reports/a.txt" "/tmp/my reports/b c.txt"`
+`./count.sh "/tmp/my reports"`
+Вывод:  
+2
 
 
 
