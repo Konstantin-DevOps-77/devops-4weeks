@@ -191,7 +191,14 @@ OK ssh active
 ## Задание 5. cron
 - Часовой пояс:
 
-Time zone - Etc/UTC(UTC, +0000)  
+`timedatectl show -p Timezone`
+`date '+%Y-%m-%d %H:%M:%S %Z'`
+`TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S %Z'`
+
+Вывод.
+Timezone=Etc/UTC
+2026-11-09 13:35:16 UTC
+2026-11-09 16:35:16 MSK
 
 
 - PATH у меня:
