@@ -306,7 +306,7 @@ log "backup done: $ARCHIVE"
 PATH=/usr/local/bin:/usr/bin:/bin
 */2 * * * * /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
 
-- **Проверка:**
+- **Проверка:**  
 `ls -l /opt/ops401/backups`
 `cat /opt/ops401/backup.log`
 `tar -tzf /opt/ops401/backups/data-*.tar.gz`
