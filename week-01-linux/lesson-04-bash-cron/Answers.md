@@ -419,16 +419,16 @@ PATH=/usr/local/bin:/usr/bin:/bin
 
 #Правильная проверка
 
-root@blank-black:/opt/ops402# sudo /opt/ops402/export.sh; echo "код: $?"
-2026-11-09 11:45:12 OK: /opt/ops402/out/export-2026-11-09.csv.gz
-код: 0
-root@blank-black:/opt/ops402# zcat /opt/ops402/out/export-$(date +%F).csv.gz
-id,city
-1,Москва
-2,Казань
-id,sum
-1,100
-2,250
+`sudo /opt/ops402/export.sh; echo "код: $?"`
+2026-11-09 11:45:12 OK: /opt/ops402/out/export-2026-11-09.csv.gz  
+код: 0  
+`zcat /opt/ops402/out/export-$(date +%F).csv.gz`  
+id,city  
+1,Москва  
+2,Казань  
+id,sum  
+1,100  
+2,250  
 
 #Ложная проверка
 root@blank-black:/opt/ops402# sudo mv /opt/ops402/incoming /opt/ops402/incoming.off
