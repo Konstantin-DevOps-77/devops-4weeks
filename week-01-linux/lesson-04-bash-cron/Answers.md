@@ -306,35 +306,31 @@ log "backup done: $ARCHIVE"
 PATH=/usr/local/bin:/usr/bin:/bin
 */2 * * * * /opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1
 
-- **Проверка:**  
+- **Проверка:**    
 `ls -l /opt/ops401/backups`
 `cat /opt/ops401/backup.log`
 `tar -tzf /opt/ops401/backups/data-*.tar.gz`
 `sudo journalctl -u cron --since "5 min ago" | grep ops401`
 
-root@blank-black:/opt/ops401/backups# ls -l /opt/ops401/backups
-total 24
--rw-r--r-- 1 root root 209 Nov  9 14:22 data-2026-11-09-1422.tar.gz
--rw-r--r-- 1 root root 209 Nov  9 14:24 data-2026-11-09-1424.tar.gz
--rw-r--r-- 1 root root 209 Nov  9 14:26 data-2026-11-09-1426.tar.gz
--rw-r--r-- 1 root root 209 Nov  9 14:28 data-2026-11-09-1428.tar.gz
--rw-r--r-- 1 root root 209 Nov  9 14:30 data-2026-11-09-1430.tar.gz
-
-`tar -tzf /opt/ops401/backups/data-2026-11-09-1428.tar.gz`
-./
-./orders.txt
-./clients.txt
-
-
-Каждые 2 минуты пишется:
-sudo journalctl -u cron --since "5 min ago" | grep ops401
-root@blank-black:/home/kostya# sudo journalctl -u cron --since "5 min ago" | grep ops401
+root@blank-black:/opt/ops401/backups# ls -l /opt/ops401/backups  
+total 24  
+-rw-r--r-- 1 root root 209 Nov  9 14:22 data-2026-11-09-1422.tar.gz  
+-rw-r--r-- 1 root root 209 Nov  9 14:24 data-2026-11-09-1424.tar.gz  
+-rw-r--r-- 1 root root 209 Nov  9 14:26 data-2026-11-09-1426.tar.gz  
+-rw-r--r-- 1 root root 209 Nov  9 14:28 data-2026-11-09-1428.tar.gz  
+-rw-r--r-- 1 root root 209 Nov  9 14:30 data-2026-11-09-1430.tar.gz  
+  
+`tar -tzf /opt/ops401/backups/data-2026-11-09-1428.tar.gz`  
+./  
+./orders.txt  
+./clients.txt  
+  
+Каждые 2 минуты пишется:  
+`sudo journalctl -u cron --since "5 min ago" | grep ops401`   
 Nov 09 14:26:01 blank-black.ptr.network CRON[1069999]: (root) CMD (/opt/ops401/backup.sh)
 Nov 09 14:26:01 blank-black.ptr.network CRON[1070001]: (root) CMD (/opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1)
 Nov 09 14:28:01 blank-black.ptr.network CRON[1070810]: (root) CMD (/opt/ops401/backup.sh)
 Nov 09 14:28:01 blank-black.ptr.network CRON[1070813]: (root) CMD (/opt/ops401/backup.sh >> /opt/ops401/backup.log 2>&1)
-
-
 
 - **Профилактика:**
 1. полные пути в cron(относительные не используем НИКОГДА);
@@ -343,7 +339,6 @@ Nov 09 14:28:01 blank-black.ptr.network CRON[1070813]: (root) CMD (/opt/ops401/b
 4. Всегда пишем лог с датами;
 5. мониторинг «свежести» бэкапа (например, «нет архива новее 25 часов → тревога с уведомлением»); 
 6. регулярный тест восстановления на актуальную дату.
-
 
 ## OPS-402
 - **Симптом:**  
