@@ -262,23 +262,21 @@ Time zone: Etc/UTC (UTC, +0000)
 sudo head -c 300 /proc/<PID>/fd/N.
 Содержимое должно показать «upstream log collector unavailable, buffering event». Оно объясняет, почему буфер вырос.
 
-3.4 Сеть (3 мин)
-ss -tlnp | grep 8600 (пока служба упала -пусто!; запомнить, проверить после запуска)
-sudo ufw status verbose (активен ли, есть ли правило 8600/tcp)
+## Шаг 4. Сеть (3 мин)
+`ss -tlnp | grep 8600` (пока служба упала -пусто!; запомнить, проверить после запуска)
+`sudo ufw status verbose` (активен ли, есть ли правило 8600/tcp)
 Читаем только BIND в конфиге: sudo grep -E '^(BIND|PORT|LOG)=' /etc/ops6/shop.conf
 Гипотеза: Возможно, BIND=127.0.0.1, то есть даже запущенный сайт снаружи недоступен.
 
-3.5 Расписание (4 мин)
+## Шаг 5. Расписание (4 мин)
 `cat /etc/cron.d/ops6-cleanup` 
 `ls -l /etc/cron.d/ops6-cleanup`
 `systemctl status cron --no-pager`
 `journalctl -u cron --since "-30min" --no-pager | tail`
 `cat /opt/ops6/cleanup.sh /usr/local/bin/logtrim`
-ls -l /var/log/ops6-cleanup.log (скорее всего файла нет: cron-строка ничего никуда не пишет)
+`ls -l /var/log/ops6-cleanup.log` (скорее всего файла нет: cron-строка ничего никуда не пишет)
 Эмуляция окружения cron: sudo env -i PATH=/usr/bin:/bin /opt/ops6/cleanup.sh (результат осмыслить после этапа 8 на тестовом файле).
 Гипотезы: у cron PATH=/usr/bin:/bin, поэтому logtrim из /usr/local/bin не находится; скрипт при этом всё равно печатает «cleanup ok» и возвращает 0 (молча не работает); вывод cron нигде не сохраняется; при пустом glob *.log переменная $f содержит звёздочку и stat ругается; $f без кавычек.
-
-
 
 ### Починка.
 # Шаг 1. Lиск (25 мин, запас 10)
@@ -286,7 +284,7 @@ ls -l /var/log/ops6-cleanup.log (скорее всего файла нет: cron
 1.1 Контрольная точка:
 `md5sum /mnt/ops6/data/orders.db`  
 1.2 Освободить место без уничтожения процесса:
-`sudo truncate -s 0 /proc/<PID>/fd/<N> 
+`sudo truncate -s 0 /proc/<PID>/fd/<N>` 
 `sudo tee /proc/<PID>/fd/<N>` 
 Альтернатива, если обнулить не получится: sudo systemctl restart ops6-logship (при рестарте файл закроется, место вернётся; флаг burst-done уже есть, повторного «взрыва» не будет). Выбрать один способ и записать, почему.  
 Проверка:
