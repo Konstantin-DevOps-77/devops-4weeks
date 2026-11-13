@@ -161,192 +161,348 @@ Core-дампы и heap-дампы.
 **Начал:** - 13.11.2026 15.00  
 **Закончил:**  
 **Часовой пояс:** - UTC+3(Moscow time)
-**Контрольная сумма orders.db от стенда:**  - 52e16646b7f2159354601e6f8decb42c  /mnt/ops6/data/orders.db...
+**Контрольная сумма orders.db от стенда:**  - 73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
 **Читал ли код стенда:** - да(бегло, особо не вчитывался)
 
-## Кратко
-(3-4 предложения: что сломалось, сколько длилось, как починили)
-Фиксация симптомов:  
--   
+1. Диагностика
 
+# Проверяем состояние службы
 
-- не отрабатывает curl:
-`curl.exe -v http://212.113.116.203:8600/health`
-*   Trying 212.113.116.203:8600...
-* Established connection to 212.113.116.203 (212.113.116.203 port 8600) from 172.19.0.1 port 62045
-* using HTTP/1.x
-> GET /health HTTP/1.1
-> Host: 212.113.116.203:8600
-> User-Agent: curl/8.22.0
-> Accept: */*
->
-* Request completely sent off
-* Empty reply from server
-* shutting down connection #0
-curl: (52) Empty reply from server
-
-- Служба упала(loaded, но не running)
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# systemctl status ops6-shop --no-pager
-● ops6-shop.service - OPS-6 shop frontend
+`sudo systemctl status ops6-shop.service --no-pager -l`
+ops6-shop.service - OPS-6 shop frontend
      Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
-     Active: activating (auto-restart) (Result: exit-code) since Fri 2026-11-13 09:59:45 UTC; 115ms ago
-    Process: 1207585 ExecStart=/usr/bin/python3 /opt/ops6/shop.py (code=exited, status=1/FAILURE)
-   Main PID: 1207585 (code=exited, status=1/FAILURE)
-        CPU: 129ms
+     Active: active (running) since Fri 2026-11-13 15:28:46 UTC; 246ms ago
+   Main PID: 1326299 (python3)
+      Tasks: 1 (limit: 2263)
+     Memory: 16.7M (peak: 20.2M)
+        CPU: 191ms
+     CGroup: /system.slice/ops6-shop.service
+             └─1326299 /usr/bin/python3 /opt/ops6/shop.py
 
-Nov 13 09:59:45 blank-black.ptr.network systemd[1]: ops6-shop.service: Main process exited, code=exited, status=1/FAILURE
-Nov 13 09:59:45 blank-black.ptr.network systemd[1]: ops6-shop.service: Failed with result 'exit-code'.
-
-- Фиксируем время
-`date`
-Fri Nov 13 10:01:58 AM UTC 2026
-
-`timedatectl`  
-timedatectl
-Local time: Fri 2026-11-13 10:03:18 UTC  
-Universal time: Fri 2026-11-13 10:03:18 UTC
-RTC time: Fri 2026-11-13 10:03:18
-Time zone: Etc/UTC (UTC, +0000)
-
-## Влияние
-(кто пострадал, что не работало, сколько по времени)
-
-## Таймлайн
-| Время | Событие | Откуда знаю (тикет / журнал / файл) |
-|---|---|---|
-
-## Диагностика и исправление
-(по шагам, в том порядке, как реально шёл. Для каждого шага: команда, что увидел, что сделал, как проверил.
-Пароль заменяй на ***)
+Вывод: служба active, runninп и enabled.  
 
 
-## Причины
-### Шаг 1. Служба и журнал (5 мин)
-`journalctl -u ops6-shop --no-pager | tail -50`
-`systemctl show ops6-shop -p Result -p NRestarts -p ActiveState -p SubState`
-Ищем: PermissionError, No space left on device, start-limit-hit.
-Ожидание: служба упала при старте, systemd перестал перезапускать из-за превышения лимита.
+`sudo journalctl -u ops6-shop.service -n 60 --no-pager` - смотрим журнал службы
+вывод:
+     ```bash
+     Nov 13 15:30:08 blank-black.ptr.network python3[1326918]: PermissionError: [Errno 13] Permission denied: '/etc/ops6/shop.conf'
+     Nov 13 15:30:08 blank-black.ptr.network systemd[1]: ops6-shop.service: Main process exited, code=exited, status=1/FAILURE
+     Nov 13 15:30:08 blank-black.ptr.network systemd[1]: ops6-shop.service: Failed with result 'exit-code'.
+     ```
+Permission Denied, status=1, Failed
 
-### Шаг 2. Права на конфиг (5 мин)  
-`ls -l /etc/ops6/shop.conf и namei -l /etc/ops6/shop.conf`
-`sudo -u ops6shop test -r /etc/ops6/shop.conf && echo читается || echo НЕ читается`
-`ps -o user,pid,cmd -C python3` (кто запущен и от кого)
-Гипотеза: файл root:root 600, а служба работает от ops6shop, поэтому не может прочитать свой конфиг. 
-Это относится к релизу «обновил конфиг».
-### Шаг 3 Диск (8 мин)
-`df -h /mnt/ops6, df -i /mnt/ops6`
-`sudo du -xh --max-depth=2 /mnt/ops6 | sort -h | tail`
-`sudo lsof +L1 2>/dev/null | grep ops6` (удалённые, но открытые файлы)
-Для найденного PID:
-`sudo ls -l /proc/<PID>/fd | grep deleted`
-`sudo cat /proc/<PID>/cmdline | tr '\0' ' '`
-`ls -la /mnt/ops6/spool | head -20`
-`ls /mnt/ops6/spool | wc -l`
-`journalctl -u ops6-logship --no-pager | tail -30`
+Проверяем права и пользоватей службы
 
-Гипотеза: df показывает почти 100%, а du намного меньше.   
-Разницу держит процесс ops6-logship (владелец ops6ship) через открытый удалённый ship-buffer.log. 
-Дежурный в 03:25 удалил файл через rm, а процесс его не закрыл. 
-Ещё возможны мелкие остатки segment-*.part в spool и повышенное использование inodes.
-Улики на сохранение до починки: записать PID, номер fd, размер (ls -l /proc/<PID>/fd/N) и первые байты:
-sudo head -c 300 /proc/<PID>/fd/N.
-Содержимое должно показать «upstream log collector unavailable, buffering event». Оно объясняет, почему буфер вырос.
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ls -l /etc/ops6/shop.conf 
+     -rw------- 1 root root 129 Nov 13 15:22 /etc/ops6/shop.conf # Файл есть
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo namei -l /etc/ops6/shop.conf
+     f: /etc/ops6/shop.conf
+     drwxr-xr-x root root /
+     drwxr-xr-x root root etc
+     drwxr-xr-x root root ops6
+     -rw------- root root shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# id ops6shop
+     uid=996(ops6shop) gid=986(ops6shop) groups=986(ops6shop)
+     ```
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo -u ops6shop test -r /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# printf 'Конфиг читается пользователем службы, код: %s\n' "$?"
+     Конфиг читается пользователем службы, код: 1
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo sed -E 's/^([[:space:]]*DB_PASSWORD[[:space:]]*=).*/\1***/' /etc/ops6/shop.conf # Выводим конфиг с замаскированным паролем
+     # Магазин: конфиг релиза 2.4
+     BIND=127.0.0.1
+     PORT=8600
+     LOG=/mnt/ops6/logs/shop.log
+     DB_PASSWORD=***
+     ```
+Типичный факт: файл root:root 600, служба работает как ops6shop, чтение ей запрещено. Просмотр с sudo не доказывает, что конфиг видит сама служба.
 
-## Шаг 4. Сеть (3 мин)
-`ss -tlnp | grep 8600` (пока служба упала -пусто!; запомнить, проверить после запуска)
-`sudo ufw status verbose` (активен ли, есть ли правило 8600/tcp)
-Читаем только BIND в конфиге: sudo grep -E '^(BIND|PORT|LOG)=' /etc/ops6/shop.conf
-Гипотеза: Возможно, BIND=127.0.0.1, то есть даже запущенный сайт снаружи недоступен.
+# Смотрим, что с диском.
 
-## Шаг 5. Расписание (4 мин)
-`cat /etc/cron.d/ops6-cleanup` 
-`ls -l /etc/cron.d/ops6-cleanup`
-`systemctl status cron --no-pager`
-`journalctl -u cron --since "-30min" --no-pager | tail`
-`cat /opt/ops6/cleanup.sh /usr/local/bin/logtrim`
-`ls -l /var/log/ops6-cleanup.log` (скорее всего файла нет: cron-строка ничего никуда не пишет)
-Эмуляция окружения cron: sudo env -i PATH=/usr/bin:/bin /opt/ops6/cleanup.sh (результат осмыслить после этапа 8 на тестовом файле).
-Гипотезы: у cron PATH=/usr/bin:/bin, поэтому logtrim из /usr/local/bin не находится; скрипт при этом всё равно печатает «cleanup ok» и возвращает 0 (молча не работает); вывод cron нигде не сохраняется; при пустом glob *.log переменная $f содержит звёздочку и stat ругается; $f без кавычек.
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# findmnt /mnt/ops6 # смотрим на подключенные файловые системы
+     TARGET    SOURCE     FSTYPE OPTIONS
+     /mnt/ops6 /dev/loop0 ext4   rw,relatime
 
-### Починка.
-# Шаг 1. Lиск (25 мин, запас 10)
-Идёт первым, потому что приложение при старте пишет в лог на этом диске и упадёт на No space left, даже если права исправить.  
-1.1 Контрольная точка:
-`md5sum /mnt/ops6/data/orders.db`  
-1.2 Освободить место без уничтожения процесса:
-`sudo truncate -s 0 /proc/<PID>/fd/<N>` 
-`sudo tee /proc/<PID>/fd/<N>` 
-Альтернатива, если обнулить не получится: sudo systemctl restart ops6-logship (при рестарте файл закроется, место вернётся; флаг burst-done уже есть, повторного «взрыва» не будет). Выбрать один способ и записать, почему.  
-Проверка:
-`df -h /mnt/ops6` (занято заметно меньше 50%)
-`sudo lsof +L1 | grep ops6` (пусто)
-`df -i /mnt/ops6`
-Остатки в spool посмотреть:
-`ls -la /mnt/ops6/spool | head и wc -c` у нескольких segment-*.part.
-Если это пустые/служебные хвосты и они занимают inodes, удалить только их:
-`sudo find /mnt/ops6/spool -name 'segment-*.part' -delete (сначала посчитать -print | wc -l). data/ не трогать.  
-Проверка «честности»:
-`sudo du -xsh /mnt/ops6` и `df -h /mnt/ops6` должны быть примерно равны. Небольшая постоянная разница это служебные структуры ext4 (журнал, lost+found), записать это в отчёт.  
-Пока logship работает, буфер снова растёт (около 18 КБ раз в 5 секунд, порядка 200 КБ в минуту).   
-Это нормально, пока работает чистка по расписанию. Это связано с этапом 8.  
-md5sum orders.db ещё раз.
-# Шаг 2: права на конфиг (15 мин)
-Копия: 
-`sudo cp /etc/ops6/shop.conf /etc/ops6/shop.conf.bak.$(date +%F-%H%M)` 
-(копия тоже будет 600 root, пароль внутри, в отчёт не вставлять).
-Минимальное исправление: 
-`sudo chown root:ops6shop /etc/ops6/shop.conf && sudo chmod 640 /etc/ops6/shop.conf`
-Проверка: 
-`ls -l /etc/ops6/shop.conf` (-rw-r----- root ops6shop)
-`sudo -u ops6shop test -r ... && echo OK, sudo -u nobody test -r ... && echo ПЛОХО || echo чужим закрыт`
-Почему не 644 и не 777:
-любой пользователь системы или скомпрометированная служба прочитает пароль БД; 777 ещё и позволит подменить конфиг.
-Запуск: 
-`sudo systemctl reset-failed ops6-shop && sudo systemctl start ops6-shop`
-`systemctl status` 
-`journalctl -u ops6-shop -n 20`.
-Ожидание: служба active, лог listening on 127.0.0.1:8600, но снаружи по-прежнему недоступна.
-Не забыть: служба работает от ops6shop, не от root (ps -o user,pid,cmd -C python3)
+     # Проверяем состояние диска, видно что заполнен полностью.
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+     Filesystem      Size  Used Avail Use% Mounted on
+     /dev/loop0       71M   66M     0 100% /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -i /mnt/ops6
+     Filesystem     Inodes IUsed IFree IUse% Mounted on
+     /dev/loop0      20480    17 20463    1% /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -xhd1 /mnt/ops6
+     16K     /mnt/ops6/lost+found
+     4.0K    /mnt/ops6/spool
+     5.1M    /mnt/ops6/data
+     4.0K    /mnt/ops6/logs
+     5.1M    /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -x -B1 -s /mnt/ops6
+     5275648 /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -B1 /mnt/ops6
+     Filesystem     1B-blocks     Used Available Use% Mounted on
+     /dev/loop0      74395648 68526080         0 100% /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof -nP +aL1 /mnt/ops6
+     COMMAND     PID     USER   FD   TYPE DEVICE SIZE/OFF NLINK NODE NAME
+     python3 1323813 ops6ship    3w   REG    7,0 63246336     0   16 /mnt/ops6/spool/ship-buffer.log (deleted)
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl status ops6-logship.service --no-pager -l
+     sudo journalctl -u ops6-logship.service -n 30 --no-pager
+     ● ops6-logship.service - OPS-6 log shipper
+          Loaded: loaded (/etc/systemd/system/ops6-logship.service; enabled; preset: enabled)
+          Active: active (running) since Fri 2026-11-13 15:22:32 UTC; 19min ago
+     Main PID: 1323813 (python3)
+          Tasks: 1 (limit: 2263)
+          Memory: 123.6M (peak: 126.5M)
+          CPU: 255ms
+          CGroup: /system.slice/ops6-logship.service
+               └─1323813 /usr/bin/python3 /opt/ops6/logship.py
 
-# Шаг 3: Адрес прослушивания (10 мин)
-Проверка: 
-`ss -tlnp | grep 8600` - показывает 127.0.0.1:8600.
-Копия конфига, затем правка только строки BIND:
-`sudo sed -i 's/^BIND=.*/BIND=0.0.0.0/' /etc/ops6/shop.conf` 
-(права после sed -i проверить заново: ls -l)
-sudo systemctl restart ops6-shop, ss -tlnp | grep 8600 (теперь 0.0.0.0:8600 или *:8600).
-Проверка на сервере: curl -s http://127.0.0.1:8600/health и curl -s http://<внешний IP>:8600/health.
-С Windows: Test-NetConnection <IP> -Port 8600. Если True уже здесь, firewall не мешает, этап 7 сократится до проверки.
-# Шаг 4: доступ снаружи (15 мин, запас 10)
-Если с Windows ещё False, а с сервера по внешнему IP работает, значит блокирует фильтр.
-Смотрим:
-`sudo ufw status verbose`
-Если ufw активен и порта нет:
-`sudo ufw allow 8600/tcp` 
-Проверки: 
-`sudo ufw status | grep 8600`, 
-`Test-NetConnection <IP> -Port 8600` → True, 
-браузер http://<IP>:8600, curl.exe -s http://<IP>:8600/health → ok.
-Скриншот или вывод curl в отчёт.
-Этап 8. Починка 5: чистка по расписанию (30 мин, запас 10)
-Цель: чистка реально работает от cron, пишет лог и честно сообщает об ошибках.
-Копии: /opt/ops6/cleanup.sh, /etc/cron.d/ops6-cleanup.
-Доказать причину до правки: создать тестовый файл >10 МБ в логах магазина  и запустить скрипт в окружении cron:
-`sudo env -i PATH=/usr/bin:/bin /opt/ops6/cleanup.sh`
-Ожидается logtrim: command not found, а в конце всё равно «cleanup ok». Записать вывод.
+     Nov 13 15:22:32 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
+     Nov 13 09:52:25 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
+     Nov 13 11:29:23 blank-black.ptr.network systemd[1]: Stopping ops6-logship.service - OPS-6 log shipper...
+     Nov 13 11:29:23 blank-black.ptr.network systemd[1]: ops6-logship.service: Deactivated successfully.
+     Nov 13 11:29:23 blank-black.ptr.network systemd[1]: Stopped ops6-logship.service - OPS-6 log shipper.
+     Nov 13 11:29:24 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
+     Nov 13 11:59:02 blank-black.ptr.network systemd[1]: Stopping ops6-logship.service - OPS-6 log shipper...
+     Nov 13 11:59:02 blank-black.ptr.network systemd[1]: ops6-logship.service: Deactivated successfully.
+     Nov 13 11:59:02 blank-black.ptr.network systemd[1]: Stopped ops6-logship.service - OPS-6 log shipper.
+     Nov 13 11:59:03 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
+     Nov 13 15:22:30 blank-black.ptr.network systemd[1]: Stopping ops6-logship.service - OPS-6 log shipper...
+     Nov 13 15:22:30 blank-black.ptr.network systemd[1]: ops6-logship.service: Deactivated successfully.
+     Nov 13 15:22:30 blank-black.ptr.network systemd[1]: Stopped ops6-logship.service - OPS-6 log shipper.
+     Nov 13 15:22:32 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
+     ```
 
-Исправить cleanup.sh: 
-абсолютный путь /usr/local/bin/logtrim; кавычки "$f"; пропуск, если файла нет ([ -f "$f" ] || continue); 
-учёт кода возврата и вывод ERROR/exit 1 вместо «ok» при сбое.
-Исправить cron-строку: */2 * * * * root /opt/ops6/cleanup.sh >> /var/log/ops6-cleanup.log 2>&1, при желании PATH=/usr/local/bin:/usr/bin:/bin в начале файла. Права 644 root:root, файл заканчивается переводом строки.
+* Вывод по диагностике диска
+     Файл буфера был удалён, но оставался открытым процессом ops6-logship через дескриптор 3. Его блоки учитывались в df, однако файл отсутствовал в обходе du.
 
-Проверить, что cron включён и подхватил файл: systemctl is-active cron, journalctl -u cron -n 20.
-Дождаться запуска (до 2 минут) и проверить /var/log/ops6-cleanup.log.
+
+* Проводим чистку
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl stop ops6-logship.service
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof -nP +aL1 /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+     Filesystem      Size  Used Avail Use% Mounted on
+     /dev/loop0       71M  5.1M   61M   8% /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -xhd1 /mnt/ops6
+     16K     /mnt/ops6/lost+found
+     4.0K    /mnt/ops6/spool
+     5.1M    /mnt/ops6/data
+     4.0K    /mnt/ops6/logs
+     5.1M    /mnt/ops6
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo md5sum /mnt/ops6/data/orders.db
+     73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+     ```
+
+* Вывод по очистке
+     После штатной остановки службы дескриптор закрылся и место освободилось.
+
+  
+
+# Дать чтение нужной группе
+
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo chown root:ops6shop /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo chmod 640 /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ls -l /etc/ops6/shop.conf
+     -rw-r----- 1 root ops6shop 129 Nov 13 15:22 /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo -u ops6shop test -r /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# printf 'Чтение службой после исправления, код: %s\n' "$?"
+     Чтение службой после исправления, код: 0
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
+     ```
+
+# Попытка запуска #2
+
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl reset-failed ops6-shop.service
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl start ops6-shop.service
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl status ops6-shop.service --no-pager -l
+     ● ops6-shop.service - OPS-6 shop frontend
+          Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
+          Active: active (running) since Fri 2026-11-13 15:52:18 UTC; 2min 10s ago
+     Main PID: 1336200 (python3)
+          Tasks: 1 (limit: 2263)
+          Memory: 8.9M (peak: 9.2M)
+          CPU: 66ms
+          CGroup: /system.slice/ops6-shop.service
+               └─1336200 /usr/bin/python3 /opt/ops6/shop.py
+     
+     #Ресет не удалил последней записи журнала
+     Nov 13 15:52:16 blank-black.ptr.network systemd[1]: ops6-shop.service: Failed with result 'exit-code'.
+     Nov 13 15:52:18 blank-black.ptr.network systemd[1]: ops6-shop.service: Scheduled restart job, restart counter is at 9571.
+     Nov 13 15:52:18 blank-black.ptr.network systemd[1]: Started ops6-shop.service - OPS-6 shop frontend.
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
+     ```
+
+* Вывод по запуску 2
+     Локально всё OK
+
+# Проверяем отвечает ли приложение снаружи и на каком адресе слушает
+
+     ``` bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ss -tlnp 'sport = :8600'
+     State                Recv-Q               Send-Q       Local Address:Port      Peer Address:Port          Process              
+     LISTEN               0                    5             127.0.0.1:8600         0.0.0.0:*                  users:(("python3",pid=1336200,fd=4))
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# curl --noproxy '*' -i --max-time 5 http://127.0.0.1:8600/health
+     HTTP/1.0 200 OK
+     Server: BaseHTTP/0.6 Python/3.12.3
+     Date: Fri, 13 Nov 2026 15:58:44 GMT
+     Content-Type: text/html; charset=utf-8
+     Content-Length: 3
+
+     ok
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl show ops6-shop.service -p User -p Group -p NRestarts
+     NRestarts=0
+     User=ops6shop
+     Group=ops6shop
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
+     ```
+
+* Вывод:
+     LISTEN 127.0.0.1:8600 - Python слушает только loopback сервера. Через публичный IP этот сокет недоступен.
+
+
+
+# Изменим адрес прослушивания
+
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo sed -i -E 's/^BIND=.*/BIND=0.0.0.0/' /etc/ops6/shop.conf
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl restart ops6-shop.service
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ss -tlnp 'sport = :8600'
+     State   Recv-Q     Send-Q    Local Address:Port  Peer Address:Port      Process     
+     LISTEN     0       5              0.0.0.0:8600            0.0.0.0:*       users:(("python3",pid=1337447,fd=4))
+     ```
+
+
+# Проверяем внешку подключение 
+
+```shell
+     PS C:\WINDOWS\system32> Test-NetConnection 212.113.116.203 -Port 8600
+
+
+     ComputerName     : 212.113.116.203
+     RemoteAddress    : 212.113.116.203
+     RemotePort       : 8600
+     InterfaceAlias   : happ-xray
+     SourceAddress    : 172.19.0.1
+     TcpTestSucceeded : True
+
+
+
+     PS C:\WINDOWS\system32> curl.exe --noproxy '*' -i --connect-timeout 5 --max-time 10 "http://212.113.116.203:8600/health"
+
+     curl: (28) Operation timed out after 10000 milliseconds with 0 bytes received
+     PS C:\WINDOWS\system32>
+```
+
+* Вывод 
+     Пришло 0 байтов, необходимо проверить фаервол и правила
+
+# Проверяем фаервол
+
+     ```bash
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# if command -v ufw > /dev/null; then
+     sudo ufw status verbose
+     sudo ufw show added
+     fi
+     Status: active
+     Logging: on (low)
+     Default: deny (incoming), allow (outgoing), deny (routed)
+     New profiles: skip
+
+     To                         Action      From
+     --                         ------      ----
+     22/tcp                     ALLOW IN    Anywhere                  
+     80/tcp                     ALLOW IN    Anywhere                  
+     443/tcp                    ALLOW IN    Anywhere                  
+     443/udp                    ALLOW IN    Anywhere                  
+     37363/tcp                  ALLOW IN    Anywhere                  
+     8443/tcp                   ALLOW IN    Anywhere                  
+     8080/tcp                   ALLOW IN    Anywhere                  
+     22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+     80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+     443/tcp (v6)               ALLOW IN    Anywhere (v6)             
+     443/udp (v6)               ALLOW IN    Anywhere (v6)             
+     37363/tcp (v6)             ALLOW IN    Anywhere (v6)             
+     8443/tcp (v6)              ALLOW IN    Anywhere (v6)             
+     8080/tcp (v6)              ALLOW IN    Anywhere (v6)             
+
+     Added user rules (see 'ufw status' for running firewall):
+     ufw allow 22/tcp
+     ufw allow 80/tcp
+     ufw allow 443/tcp
+     ufw allow 443/udp
+     ufw allow 37363/tcp
+     ufw allow 8443/tcp
+     ufw allow 8080/tcp
+
+     # Одобряем 8600
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ufw allow 8600/tcp comment 'ops6-lab'
+     Rule added
+     Rule added (v6)
+     ```
+     
+* Вывод 
+     Фаерволл блокировал 8600, исправили
+
+
+# Снова проверяем внешку
+
+     ```shell
+     PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8600
+
+     ComputerName     : 212.113.116.203
+     RemoteAddress    : 212.113.116.203
+     RemotePort       : 8600
+     InterfaceAlias   : happ-xray
+     SourceAddress    : 172.19.0.1
+     TcpTestSucceeded : True
+
+     PS C:\WINDOWS\system32> curl.exe --noproxy '*' -i --connect-timeout 5 --max-time 10 "http://212.113.116.203:8600/health"
+
+     HTTP/1.0 200 OK
+     Server: BaseHTTP/0.6 Python/3.12.3
+     Date: Fri, 13 Nov 2026 16:20:38 GMT
+     Content-Type: text/html; charset=utf-8
+     Content-Length: 3
+
+     ok
+     ```
+* Вывод - руками починили приложение
+
+# Профилактика повторного падения 
+# Проверить авточистку логов
+     ```bash
+     sudo -u ops6shop bash -c 'head -c 11M /dev/zero >> /mnt/ops6/logs/shop.log' # Добавляем 11 мб к логам
+     sudo stat -c 'size=%s inode=%i' /mnt/ops6/logs/shop.log
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+     Filesystem      Size  Used Avail Use% Mounted on
+     /dev/loop0       71M   21M   45M  32% /mnt/ops6 # 32% 21 MB занято
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sleep 120
+     root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+     Filesystem      Size  Used Avail Use% Mounted on
+     /dev/loop0       71M   11M   45M  32% /mnt/ops6 # 15% 11 MB занято
+     ```
+
+* Вывод - лог обнулился, магазин отвечает
+
+# Проверяем авточистку снова
 
 
 ## Вопросы коллегам
 1. Диме: «Какие именно параметры и права ты менял в /etc/ops6/shop.conf в релизе 2.4 (владелец, режим, значения BIND/PORT/LOG) и какой там был старый конфиг? Проверял ли ты после выката доступность снаружи?» Зачем: восстановить, что было «до», и выяснить, была ли проверка после выката.  
 2. Пете: «Какой именно командой ты чистил в 03:25 (rm/truncate/что именно, какой файл) и перезапускал ли что-то после?» Зачем: подтвердить версию с rm по файлу, который держит процесс, и уточнить, что он проверял после.  
+
+
+
+# К отчету
+before: root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt/ops6/data/orders.db 
+73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+after:
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt/ops6/data/orders.db 
+73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
 
 ## Таймлайн
 Время	Событие	Откуда знаю
