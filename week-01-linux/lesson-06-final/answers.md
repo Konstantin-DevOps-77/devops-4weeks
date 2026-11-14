@@ -561,6 +561,11 @@ root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#
 ```
 Заказы целы: 
 `md5sum /mnt/ops6/data/orders.db` совпадает с выводом стенда.
+**Контрольная сумма orders.db от стенда:**:   73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# md5sum /mnt/ops6/data/orders.db
+73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+```
 5. Авария не повторится сама:
 `sudo -u ops6shop bash -c 'head -c 11M /dev/zero >> /mnt/ops6/logs/shop.log`
 `ls -l /mnt/ops6/logs/shop.log` (11 МБ), ждать до 2 минут, 
