@@ -158,16 +158,16 @@ Core-дампы и heap-дампы.
 
 # Отчёт об инциденте INC-601
 
-**Начал:** - 13.11.2026 15.00  
-**Закончил:**  
-**Часовой пояс:** - UTC+3(Moscow time)
-**Контрольная сумма orders.db от стенда:**  - 73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+**Начал:** - 13.11.2026 17.00    
+**Закончил:** - 13.11.2026 20.00   
+**Часовой пояс:** - UTC+3(Moscow time)  
+**Контрольная сумма orders.db от стенда:**:   73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
 **Читал ли код стенда:** - да(бегло, особо не вчитывался)
 
 1. Диагностика
 
+Шаг.1
 # Проверяем состояние службы
-
 `sudo systemctl status ops6-shop.service --no-pager -l`
 ops6-shop.service - OPS-6 shop frontend
      Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
@@ -179,10 +179,11 @@ ops6-shop.service - OPS-6 shop frontend
      CGroup: /system.slice/ops6-shop.service
              └─1326299 /usr/bin/python3 /opt/ops6/shop.py
 
-Вывод: служба active, runninп и enabled.  
+Вывод: служба active, running и enabled.  
 
-
-`sudo journalctl -u ops6-shop.service -n 60 --no-pager` - смотрим журнал службы
+Шаг.2
+# Проверяем журнал службы
+`sudo journalctl -u ops6-shop.service -n 60 --no-pager`  
 вывод:
      ```bash
      Nov 13 15:30:08 blank-black.ptr.network python3[1326918]: PermissionError: [Errno 13] Permission denied: '/etc/ops6/shop.conf'
@@ -191,7 +192,10 @@ ops6-shop.service - OPS-6 shop frontend
      ```
 Permission Denied, status=1, Failed
 
-Проверяем права и пользоватей службы
+Вывод - найдена проблема с доступом к файлу конфига
+
+Шаг 3.
+# Проверяем права и пользоватей службы + смотрим конфиг
 
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo ls -l /etc/ops6/shop.conf 
@@ -216,9 +220,11 @@ Permission Denied, status=1, Failed
      LOG=/mnt/ops6/logs/shop.log
      DB_PASSWORD=***
      ```
-Типичный факт: файл root:root 600, служба работает как ops6shop, чтение ей запрещено. Просмотр с sudo не доказывает, что конфиг видит сама служба.
+Вывод: файл root:root 600, служба работает как ops6shop, чтение ей запрещено. Просмотр с sudo не доказывает, что конфиг видит сама служба.
+Другими словами, служба не может прочитать собственный конфиг.
 
-# Смотрим, что с диском.
+Шаг. 4
+# Проверяем загруженность диска.
 
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# findmnt /mnt/ops6 # смотрим на подключенные файловые системы
@@ -274,11 +280,11 @@ Permission Denied, status=1, Failed
      Nov 13 15:22:32 blank-black.ptr.network systemd[1]: Started ops6-logship.service - OPS-6 log shipper.
      ```
 
-* Вывод по диагностике диска
-     Файл буфера был удалён, но оставался открытым процессом ops6-logship через дескриптор 3. Его блоки учитывались в df, однако файл отсутствовал в обходе du.
+* Вывод: файл буфера был удалён, но оставался открытым процессом ops6-logship через дескриптор 3. Его блоки учитывались в df, однако файл отсутствовал в обходе du. Поэтому rm не решил проблему освобождения диска.
 
-
-* Проводим чистку
+### Исправление
+Шаг 1. 
+# Очищаем диск корректным образом.
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl stop ops6-logship.service
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof -nP +aL1 /mnt/ops6
@@ -295,12 +301,11 @@ Permission Denied, status=1, Failed
      73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
      ```
 
-* Вывод по очистке
+* Вывод по очистке.
      После штатной остановки службы дескриптор закрылся и место освободилось.
 
-  
-
-# Дать чтение нужной группе
+Шаг 2.
+# Производим назначение доступа для чтения конфига ops6shop
 
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo chown root:ops6shop /etc/ops6/shop.conf
@@ -312,8 +317,10 @@ Permission Denied, status=1, Failed
      Чтение службой после исправления, код: 0
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
      ```
+     Вывод: даем чтение по принципу наименьших привилегий
 
-# Попытка запуска #2
+Шаг 3.
+# Пробуем запустить службу.
 
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo systemctl reset-failed ops6-shop.service
@@ -328,7 +335,8 @@ Permission Denied, status=1, Failed
           CPU: 66ms
           CGroup: /system.slice/ops6-shop.service
                └─1336200 /usr/bin/python3 /opt/ops6/shop.py
-     
+
+
      #Ресет не удалил последней записи журнала
      Nov 13 15:52:16 blank-black.ptr.network systemd[1]: ops6-shop.service: Failed with result 'exit-code'.
      Nov 13 15:52:18 blank-black.ptr.network systemd[1]: ops6-shop.service: Scheduled restart job, restart counter is at 9571.
@@ -336,9 +344,9 @@ Permission Denied, status=1, Failed
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
      ```
 
-* Вывод по запуску 2
-     Локально всё OK
+* Вывод: Локально всё OK.
 
+Шаг 4.
 # Проверяем отвечает ли приложение снаружи и на каком адресе слушает
 
      ``` bash
@@ -361,11 +369,10 @@ Permission Denied, status=1, Failed
      ```
 
 * Вывод:
-     LISTEN 127.0.0.1:8600 - Python слушает только loopback сервера. Через публичный IP этот сокет недоступен.
+     LISTEN 127.0.0.1:8600 - Python слушает только loopback сервера. Через публичный IP этот сокет недоступен(=пользователи не могут работать)
 
-
-
-# Изменим адрес прослушивания
+Шаг 5.
+# Изменим адрес прослушивания для доступа внешних пользователей.
 
      ```bash
      root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo sed -i -E 's/^BIND=.*/BIND=0.0.0.0/' /etc/ops6/shop.conf
@@ -375,8 +382,8 @@ Permission Denied, status=1, Failed
      LISTEN     0       5              0.0.0.0:8600            0.0.0.0:*       users:(("python3",pid=1337447,fd=4))
      ```
 
-
-# Проверяем внешку подключение 
+Шаг 6.
+# Проверяем внешнее подключение 
 
 ```shell
      PS C:\WINDOWS\system32> Test-NetConnection 212.113.116.203 -Port 8600
@@ -398,8 +405,9 @@ Permission Denied, status=1, Failed
 ```
 
 * Вывод 
-     Пришло 0 байтов, необходимо проверить фаервол и правила
+     Базовое соединение установлено, но с curl пришло 0 байтов, необходимо проверить фаервол и правила.
 
+Шаг 7.
 # Проверяем фаервол
 
      ```bash
@@ -445,10 +453,10 @@ Permission Denied, status=1, Failed
      ```
      
 * Вывод 
-     Фаерволл блокировал 8600, исправили
+     Фаерволл блокировал порт 8600, добавили необходимое правило. 
 
-
-# Снова проверяем внешку
+Шаг 8.
+# Повторно проверяем внешнее подключение.
 
      ```shell
      PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8600
@@ -486,10 +494,7 @@ Permission Denied, status=1, Failed
      /dev/loop0       71M   11M   45M  32% /mnt/ops6 # 15% 11 MB занято
      ```
 
-* Вывод - лог обнулился, магазин отвечает
-
-# Проверяем авточистку снова
-
+* Вывод: лог обнулился, магазин отвечает
 
 ## Вопросы коллегам
 1. Диме: «Какие именно параметры и права ты менял в /etc/ops6/shop.conf в релизе 2.4 (владелец, режим, значения BIND/PORT/LOG) и какой там был старый конфиг? Проверял ли ты после выката доступность снаружи?» Зачем: восстановить, что было «до», и выяснить, была ли проверка после выката.  
