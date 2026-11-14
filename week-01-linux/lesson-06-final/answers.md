@@ -166,20 +166,20 @@ Core-дампы и heap-дампы.
 
 1. Диагностика
 
-Шаг.1
-# Проверяем состояние службы
-`sudo systemctl status ops6-shop.service --no-pager -l`
-ops6-shop.service - OPS-6 shop frontend
-     Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
-     Active: active (running) since Fri 2026-11-13 15:28:46 UTC; 246ms ago
-   Main PID: 1326299 (python3)
-      Tasks: 1 (limit: 2263)
-     Memory: 16.7M (peak: 20.2M)
-        CPU: 191ms
-     CGroup: /system.slice/ops6-shop.service
-             └─1326299 /usr/bin/python3 /opt/ops6/shop.py
 
-Вывод: служба active, running и enabled.  
+# Шаг.1. Проверяем состояние службы.
+`sudo systemctl status ops6-shop.service --no-pager -l`  
+ops6-shop.service - OPS-6 shop frontend  
+     Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled;   preset: enabled)  
+     Active: active (running) since Fri 2026-11-13 15:28:46 UTC; 246ms ago    
+   Main PID: 1326299 (python3)  
+      Tasks: 1 (limit: 2263)  
+     Memory: 16.7M (peak: 20.2M)  
+        CPU: 191ms  
+     CGroup: /system.slice/ops6-shop.service  
+             └─1326299 /usr/bin/python3 /opt/ops6/shop.py  
+
+Вывод: служба active, running и enabled.    
 
 Шаг.2
 # Проверяем журнал службы
