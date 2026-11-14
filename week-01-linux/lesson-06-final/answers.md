@@ -637,6 +637,7 @@ truncate -s 0 "$1" && echo "$(date '+%F %T') trimmed $1"
 ```  
   
 исправленный cleanup.sh  
+```bash
 #!/bin/bash  
 #При ошибке нужно остановится и не печатать echo "cleanup ok"    
 set -e  
