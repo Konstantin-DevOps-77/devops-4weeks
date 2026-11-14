@@ -487,21 +487,78 @@ root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt
 
 ## Приёмка
 Выполнить и вставить выводы по каждому пункту.
-1. Снаружи: Test-NetConnection <IP> -Port 8600 → True; браузер; curl.exe -s http://<IP>:8600/health → ok.
+1. Снаружи: Test-NetConnection <IP> -Port 8600 → True;  
+```shell
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8600
 
+
+ComputerName     : 212.113.116.203
+RemoteAddress    : 212.113.116.203
+RemotePort       : 8600
+InterfaceAlias   : happ-xray
+SourceAddress    : 172.19.0.1
+TcpTestSucceeded : True
+```
+ браузер; 
+ Магазин работает
+
+ curl.exe -s http://<IP>:8600/health
+curl -s http://212.113.116.203:8600/health
+ok
 2. Служба здорова:
 `sudo systemctl restart ops6-shop` 
 `systemctl status ops6-shop` (active (running))
+systemctl status ops6-shop
+● ops6-shop.service - OPS-6 shop frontend
+     Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-11-14 16:15:50 UTC; 9s ago
+   Main PID: 1380724 (python3)
+      Tasks: 1 (limit: 2263)
+     Memory: 9.5M (peak: 9.7M)
+        CPU: 523ms
+     CGroup: /system.slice/ops6-shop.service
+             └─1380724 /usr/bin/python3 /opt/ops6/shop.py
 `systemctl is-enabled ops6-shop (enabled)` снова /health.
-
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# systemctl is-enabled ops6-shop
+enabled
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# curl -s http://212.113.116.203:8600/health
+ok
+```
 3. Безопасность: 
 `ls -l /etc/ops6/shop.conf`
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# ls -l /etc/ops6/shop.conf
+-rw-r----- 1 root ops6shop 127 Nov 13 16:02 /etc/ops6/shop.conf
+```
 `ps -o user,pid,cmd -C python3` (пользователь ops6shop, не root). Показывать без пароля.
+```bash
+ ps -o user,pid,cmd -C python3
+USER         PID CMD
+mtr-bac+     916 /usr/bin/python3 /usr/local/lib/3x-ui-pro/mtr-backend.py --port 18055
+root     1015058 python3 -m http.server 8080 --bind 127.0.0.1 --directory /root/web
+ops6ship 1338026 /usr/bin/python3 /opt/ops6/logship.py
+ops6shop 1380724 /usr/bin/python3 /opt/ops6/shop.py
+```
 
 4. Место освобождено честно:
-`df -h /mnt/ops6` 
+`df -h /mnt/ops6`
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop0       71M   15M   51M  23% /mnt/ops6
+```
+
 `sudo du -xsh /mnt/ops6`
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -xsh /mnt/ops6
+15M     /mnt/ops6
+```
 `sudo lsof +L1 | grep ops6` (пусто).
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof +L1 | grep ops6
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
+```
 Заказы целы: 
 `md5sum /mnt/ops6/data/orders.db` совпадает с выводом стенда.
 5. Авария не повторится сама:
