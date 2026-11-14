@@ -612,6 +612,21 @@ p
 4. Место «удалили» через rm, файл остался занятым процессом -> место не вернулось.
 5. Чистка по расписанию не работала: у cron нет /usr/local/bin в PATH, скрипт скрывал ошибку («cleanup ok», код 0) и ничего не логировал.  
 
+#Исходный вариант(сообщение об очистке появляется всегда - нет условия его обработки)
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /etc/cron.d/ops6-cleanup
+*/2 * * * * root /opt/ops6/cleanup.sh >> /var/log/ops6-cleanup.log 2>&1
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /opt/ops6/cleanup.sh
+#!/bin/bash
+# Чистка буферов и логов магазина: всё, что больше 10 МБ, обнуляем
+for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do
+  if [ $(stat -c %s $f) -gt 10485760 ]; then
+    logtrim $f
+  fi
+done
+echo "cleanup ok"
+```
+
 # Способствующие факторы:
 1. нет проверки доступности снаружи после выката;
 2. алерт на диск не закрывали проверкой результата, дежурный самостоятельно решил, что «мониторинг глючит»;
