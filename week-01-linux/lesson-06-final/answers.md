@@ -477,181 +477,184 @@ Permission Denied, status=1, Failed
 
 
 # К отчету
-before: root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt/ops6/data/orders.db 
+before:  
+```bash
+ root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt/ops6/data/orders.db 
 73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
-after:
+```  
+after:  
+```bash
 root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#  md5sum /mnt/ops6/data/orders.db 
 73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
+```  
 
-## Приёмка
+## Приёмка  
 Выполнить и вставить выводы по каждому пункту.
-1. Снаружи: Test-NetConnection <IP> -Port 8600 → True;  
-```shell
-PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8600
+1. Снаружи: Test-NetConnection <IP> -Port 8600 → True;    
+```shell  
+PS C:\Users\Admin> Test-NetConnection 212.113.116.203 -Port 8600  
+  
+ComputerName     : 212.113.116.203  
+RemoteAddress    : 212.113.116.203  
+RemotePort       : 8600  
+InterfaceAlias   : happ-xray  
+SourceAddress    : 172.19.0.1  
+TcpTestSucceeded : True  
+```  
+ браузер;   
+ Магазин работает  
+  
+curl.exe -s http://<IP>:8600/health  
+curl -s http://212.113.116.203:8600/health  
+ok  
+2. Служба здорова:  
+`sudo systemctl restart ops6-shop`   
+`systemctl status ops6-shop` (active (running))  
+systemctl status ops6-shop  
+● ops6-shop.service - OPS-6 shop frontend  
+     Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)  
+     Active: active (running) since Sat 2026-11-14 16:15:50 UTC; 9s ago  
+   Main PID: 1380724 (python3)  
+      Tasks: 1 (limit: 2263)  
+     Memory: 9.5M (peak: 9.7M)  
+        CPU: 523ms  
+     CGroup: /system.slice/ops6-shop.service  
+             └─1380724 /usr/bin/python3 /opt/ops6/shop.py  
+`systemctl is-enabled ops6-shop (enabled)` снова /health.  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# systemctl is-enabled ops6-shop  
+enabled  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# curl -s http://212.113.116.203:8600/health  
+ok  
+```  
+3. Безопасность:   
+`ls -l /etc/ops6/shop.conf`  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# ls -l /etc/ops6/shop.conf  
+-rw-r----- 1 root ops6shop 127 Nov 13 16:02 /etc/ops6/shop.conf  
+```  
+`ps -o user,pid,cmd -C python3` (пользователь ops6shop, не root). Показывать без пароля.  
+```bash  
+ ps -o user,pid,cmd -C python3  
+USER         PID CMD  
+mtr-bac+     916 /usr/bin/python3 /usr/local/lib/3x-ui-pro/mtr-backend.py --port 18055  
+root     1015058 python3 -m http.server 8080 --bind 127.0.0.1 --directory /root/web  
+ops6ship 1338026 /usr/bin/python3 /opt/ops6/logship.py  
+ops6shop 1380724 /usr/bin/python3 /opt/ops6/shop.py  
+```  
 
+4. Место освобождено честно:  
+`df -h /mnt/ops6`  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6  
+Filesystem      Size  Used Avail Use% Mounted on  
+/dev/loop0       71M   15M   51M  23% /mnt/ops6  
+```  
+  
+`sudo du -xsh /mnt/ops6`  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -xsh /mnt/ops6  
+15M     /mnt/ops6  
+```  
+`sudo lsof +L1 | grep ops6` (пусто).  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof +L1 | grep ops6  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#   
+```  
+Заказы целы:   
+`md5sum /mnt/ops6/data/orders.db` совпадает с выводом стенда.  
+**Контрольная сумма orders.db от стенда:**:     73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# md5sum /mnt/ops6/data/orders.db  
+73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db  
+```  
+5. Авария не повторится сама:  
+`sudo -u ops6shop bash -c 'head -c 11M /dev/zero >> /mnt/ops6/logs/shop.log`  
+`ls -l /mnt/ops6/logs/shop.log` (11 МБ), ждать до 2 минут,   
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6  
+Filesystem      Size  Used Avail Use% Mounted on  
+/dev/loop0       71M   18M   48M  27% /mnt/ops6  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6  
+Filesystem      Size  Used Avail Use% Mounted on  
+/dev/loop0       71M  6.8M   59M  11% /mnt/ops6  
+```  
+снова   
+`` (нулевой размер или маленький),  
+`tail /var/log/ops6-cleanup.log` (запись trimmed).  
+```bash  
+cleanup ok  
+cleanup ok  
+cleanup ok  
+2026-11-14 16:22:01 trimmed /mnt/ops6/spool/ship-buffer.log  
+cleanup ok  
+cleanup ok  
+cleanup ok  
+cleanup ok  
+2026-11-14 16:30:02 trimmed /mnt/ops6/logs/shop.log  
+cleanup ok  
+```  
 
-ComputerName     : 212.113.116.203
-RemoteAddress    : 212.113.116.203
-RemotePort       : 8600
-InterfaceAlias   : happ-xray
-SourceAddress    : 172.19.0.1
-TcpTestSucceeded : True
-```
- браузер; 
- Магазин работает
+Отчёт полный:   
+`grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# grep -n 'Sh0p' lesson-06-final/answers.md  
+576:`grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux#   
+```  
 
- curl.exe -s http://<IP>:8600/health
-curl -s http://212.113.116.203:8600/health
-ok
-2. Служба здорова:
-`sudo systemctl restart ops6-shop` 
-`systemctl status ops6-shop` (active (running))
-systemctl status ops6-shop
-● ops6-shop.service - OPS-6 shop frontend
-     Loaded: loaded (/etc/systemd/system/ops6-shop.service; enabled; preset: enabled)
-     Active: active (running) since Sat 2026-11-14 16:15:50 UTC; 9s ago
-   Main PID: 1380724 (python3)
-      Tasks: 1 (limit: 2263)
-     Memory: 9.5M (peak: 9.7M)
-        CPU: 523ms
-     CGroup: /system.slice/ops6-shop.service
-             └─1380724 /usr/bin/python3 /opt/ops6/shop.py
-`systemctl is-enabled ops6-shop (enabled)` снова /health.
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# systemctl is-enabled ops6-shop
-enabled
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# curl -s http://212.113.116.203:8600/health
-ok
-```
-3. Безопасность: 
-`ls -l /etc/ops6/shop.conf`
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# ls -l /etc/ops6/shop.conf
--rw-r----- 1 root ops6shop 127 Nov 13 16:02 /etc/ops6/shop.conf
-```
-`ps -o user,pid,cmd -C python3` (пользователь ops6shop, не root). Показывать без пароля.
-```bash
- ps -o user,pid,cmd -C python3
-USER         PID CMD
-mtr-bac+     916 /usr/bin/python3 /usr/local/lib/3x-ui-pro/mtr-backend.py --port 18055
-root     1015058 python3 -m http.server 8080 --bind 127.0.0.1 --directory /root/web
-ops6ship 1338026 /usr/bin/python3 /opt/ops6/logship.py
-ops6shop 1380724 /usr/bin/python3 /opt/ops6/shop.py
-```
-
-4. Место освобождено честно:
-`df -h /mnt/ops6`
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/loop0       71M   15M   51M  23% /mnt/ops6
-```
-
-`sudo du -xsh /mnt/ops6`
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo du -xsh /mnt/ops6
-15M     /mnt/ops6
-```
-`sudo lsof +L1 | grep ops6` (пусто).
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo lsof +L1 | grep ops6
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
-```
-Заказы целы: 
-`md5sum /mnt/ops6/data/orders.db` совпадает с выводом стенда.
-**Контрольная сумма orders.db от стенда:**:   73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# md5sum /mnt/ops6/data/orders.db
-73c8ebb18af388d4c75c0d81159142a4  /mnt/ops6/data/orders.db
-```
-5. Авария не повторится сама:
-`sudo -u ops6shop bash -c 'head -c 11M /dev/zero >> /mnt/ops6/logs/shop.log`
-`ls -l /mnt/ops6/logs/shop.log` (11 МБ), ждать до 2 минут, 
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/loop0       71M   18M   48M  27% /mnt/ops6
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/loop0       71M  6.8M   59M  11% /mnt/ops6
-```
-снова 
-`` (нулевой размер или маленький),
-`tail /var/log/ops6-cleanup.log` (запись trimmed).
-```bash
-cleanup ok
-cleanup ok
-cleanup ok
-2026-11-14 16:22:01 trimmed /mnt/ops6/spool/ship-buffer.log
-cleanup ok
-cleanup ok
-cleanup ok
-cleanup ok
-2026-11-14 16:30:02 trimmed /mnt/ops6/logs/shop.log
-cleanup ok
-```
-
-Отчёт полный: 
-`grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# grep -n 'Sh0p' lesson-06-final/answers.md
-576:`grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
-```
-
-НО! Если вместо sed использовать cat -> пароль будет выведен явно и в нем фигурирует Sh0
-p
-
+НО! Если вместо sed использовать cat -> пароль будет выведен явно и в нем фигурирует Sh0p  
+  
 # Основной триггер: релиз 2.4 (конфиг) и внешняя причина: отправщик логов накопил буфер, пока коллектор недоступен.
 # Корневые причины:
 1. Конфиг после релиза не читается пользователем службы (root:root 600).
 2. В конфиге BIND=127.0.0.1, сайт не слушает внешний интерфейс.
 3. Буфер отправщика логов не ограничен по размеру и забил диск.
 4. Место «удалили» через rm, файл остался занятым процессом -> место не вернулось.
-5. Чистка по расписанию не работала: у cron нет /usr/local/bin в PATH, скрипт скрывал ошибку («cleanup ok», код 0) и ничего не логировал.  
+5. Чистка по расписанию не работала: у cron нет /usr/local/bin в PATH, скрипт скрывал ошибку («cleanup ok», код 0) и ничего не логировал.    
 
-Врезка по чистке
-#Исходный вариант(сообщение об очистке появляется всегда - нет условия его обработки)
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /etc/cron.d/ops6-cleanup
-*/2 * * * * root /opt/ops6/cleanup.sh >> /var/log/ops6-cleanup.log 2>&1
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /opt/ops6/cleanup.sh
-#!/bin/bash
-# Чистка буферов и логов магазина: всё, что больше 10 МБ, обнуляем
-for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do
-  if [ $(stat -c %s $f) -gt 10485760 ]; then
-    logtrim $f
-  fi
-done
-echo "cleanup ok"
-```
-#logtrim
-```bash
-root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /usr/local/bin/logtrim
-#!/bin/bash
-# logtrim <файл>: обнулить лог, не удаляя его
-truncate -s 0 "$1" && echo "$(date '+%F %T') trimmed $1"
-```
-
-исправленный cleanup.sh
-#!/bin/bash
-# При ошибке нужно остановится и не печатать echo "cleanup ok"
-set -e
-# Исправим проблему с PATH
-export PATH=/usr/bin:/bin
-# При отсутсвии логов цикл просто пропустится
-shopt -s nullglob
-
-for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do
-  size=$(stat -c %s -- "$file")
-  if (( size > 10485760 )); then
-     /usr/local/bin/logtrim "$file"
-  fi
-done
-echo "cleanup ok"
-```
-
-Основной момент заключается в cleanup.sh, он мог не найти logtrim, игнорировал ошибку и печатал собственное cleanup ok.
+Врезка по чистке  
+#Исходный вариант(сообщение об очистке появляется всегда - нет условия его обработки)  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /etc/cron.d/ops6-cleanup  
+*/2 * * * * root /opt/ops6/cleanup.sh >> /var/log/ops6-cleanup.log 2>&1  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /opt/ops6/cleanup.sh  
+#!/bin/bash  
+# Чистка буферов и логов магазина: всё, что больше 10 МБ, обнуляем  
+for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do  
+  if [ $(stat -c %s $f) -gt 10485760 ]; then  
+    logtrim $f  
+  fi  
+done  
+echo "cleanup ok"  
+```  
+#logtrim  
+```bash  
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /usr/local/bin/logtrim  
+#!/bin/bash  
+# logtrim <файл>: обнулить лог, не удаляя его  
+truncate -s 0 "$1" && echo "$(date '+%F %T') trimmed $1"  
+```  
+  
+исправленный cleanup.sh  
+#!/bin/bash  
+# При ошибке нужно остановится и не печатать echo "cleanup ok"    
+set -e  
+# Исправим проблему с PATH  
+export PATH=/usr/bin:/bin  
+# При отсутсвии логов цикл просто пропустится  
+shopt -s nullglob  
+  
+for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do  
+  size=$(stat -c %s -- "$file")  
+  if (( size > 10485760 )); then  
+     /usr/local/bin/logtrim "$file"  
+  fi  
+done  
+echo "cleanup ok"  
+```  
+  
+Основной момент заключается в cleanup.sh, он мог не найти logtrim, игнорировал ошибку и печатал собственное cleanup ok.  
 
 # Способствующие факторы:
 1. нет проверки доступности снаружи после выката;
