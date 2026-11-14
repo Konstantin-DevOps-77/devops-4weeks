@@ -569,12 +569,40 @@ root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# md5sum /mnt/
 5. Авария не повторится сама:
 `sudo -u ops6shop bash -c 'head -c 11M /dev/zero >> /mnt/ops6/logs/shop.log`
 `ls -l /mnt/ops6/logs/shop.log` (11 МБ), ждать до 2 минут, 
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop0       71M   18M   48M  27% /mnt/ops6
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# df -h /mnt/ops6
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop0       71M  6.8M   59M  11% /mnt/ops6
+```
 снова 
-`ls -l` (нулевой размер или маленький),
+`` (нулевой размер или маленький),
 `tail /var/log/ops6-cleanup.log` (запись trimmed).
+```bash
+cleanup ok
+cleanup ok
+cleanup ok
+2026-11-14 16:22:01 trimmed /mnt/ops6/spool/ship-buffer.log
+cleanup ok
+cleanup ok
+cleanup ok
+cleanup ok
+2026-11-14 16:30:02 trimmed /mnt/ops6/logs/shop.log
+cleanup ok
+```
+
 Отчёт полный: 
 `grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# grep -n 'Sh0p' lesson-06-final/answers.md
+576:`grep -n 'Sh0p' answers.md` (должно быть пусто, ищем фрагмент пароля), проверить, что везде ***.
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# 
+```
 
+НО! Если вместо sed использовать cat -> пароль будет выведен явно и в нем фигурирует Sh0
+p
 
 # Основной триггер: релиз 2.4 (конфиг) и внешняя причина: отправщик логов накопил буфер, пока коллектор недоступен.
 # Корневые причины:
