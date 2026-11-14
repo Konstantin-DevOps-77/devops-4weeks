@@ -626,6 +626,34 @@ for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do
 done
 echo "cleanup ok"
 ```
+#Ловушка logtrim
+```bash
+root@blank-black:/home/kostya/projects/devops-4weeks/week-01-linux# sudo cat /usr/local/bin/logtrim
+#!/bin/bash
+# logtrim <файл>: обнулить лог, не удаляя его
+truncate -s 0 "$1" && echo "$(date '+%F %T') trimmed $1"
+```
+
+исправленный cleanup.sh
+#!/bin/bash
+
+# При ошибке нужно остановится и не печатать echo "cleanup ok"
+set -e
+# Исправим проблему с PATH
+export PATH=/usr/bin:/bin
+# При отсутсвии логов цикл просто пропустится
+shopt -s nullglob
+
+for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do
+  size=$(stat -c %s -- "$file")
+  if (( size > 10485760 )); then
+     /usr/local/bin/logtrim "$file"
+  fi
+done
+echo "cleanup ok"
+```
+
+Основной косяк заключатеся в cleanup.sh, он мог не найти logtrim, игнорировал ошибку и печатал собственное cleanup ok
 
 # Способствующие факторы:
 1. нет проверки доступности снаружи после выката;
