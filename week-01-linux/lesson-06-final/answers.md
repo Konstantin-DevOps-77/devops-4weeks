@@ -638,11 +638,11 @@ truncate -s 0 "$1" && echo "$(date '+%F %T') trimmed $1"
   
 исправленный cleanup.sh  
 #!/bin/bash  
-# При ошибке нужно остановится и не печатать echo "cleanup ok"    
+#При ошибке нужно остановится и не печатать echo "cleanup ok"    
 set -e  
-# Исправим проблему с PATH  
+#Исправим проблему с PATH  
 export PATH=/usr/bin:/bin  
-# При отсутсвии логов цикл просто пропустится  
+#При отсутсвии логов цикл просто пропустится  
 shopt -s nullglob  
   
 for f in /mnt/ops6/spool/*.log /mnt/ops6/logs/*.log; do  
