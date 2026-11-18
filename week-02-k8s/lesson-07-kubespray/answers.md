@@ -154,6 +154,15 @@ blank-black2               : ok=648  changed=136  unreachable=0    failed=0    s
 - Падения и что сделал:
 Bind IP -> 10.0.0.1 -> 82.148.225.27
 ## Шаг 10. kubectl под своим пользователем
+
+ДО
+kubectl get nodes
+E1118 14:41:40.686630   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E1118 14:41:40.687072   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E1118 14:41:40.688526   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E1118 14:41:40.688887   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E1118 14:41:40.690585   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
 ## Шаг 11. Проверки
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
