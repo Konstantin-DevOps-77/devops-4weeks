@@ -15,6 +15,12 @@ kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh
 blank-black2.ptr.network
 kostya
 ## Шаг 3. Имя ноды
+#Терминал А(Ansible)
+kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname -s'
+\blank-black2
+#Терминал B(Управляемая Node kubernetes)
+hostnamectl
+Static hostname: blank-black2.ptr.network
 ## Шаг 4. Kubespray и Ansible
 ## Шаг 5. Инвентарь
 ## Шаг 6. Настройки
