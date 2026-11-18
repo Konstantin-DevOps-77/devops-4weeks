@@ -11,6 +11,9 @@
 ## Шаг 1. Нода (для варианта А)
 Выбрано создание нового сервера.
 ## Шаг 2. Ключ для Ansible
+kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname; whoami'
+blank-black2.ptr.network
+kostya
 ## Шаг 3. Имя ноды
 ## Шаг 4. Kubespray и Ansible
 ## Шаг 5. Инвентарь
