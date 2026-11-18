@@ -22,6 +22,10 @@ kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh
 hostnamectl
 Static hostname: blank-black2.ptr.network
 ## Шаг 4. Kubespray и Ansible
+kostya@blank-black:~/kubespray$ git describe --tags
+v2.31.0
+(kubespray-venv) kostya@blank-black:~/kubespray$ ansible --version | head -1
+ansible [core 2.18.20]
 ## Шаг 5. Инвентарь
 ## Шаг 6. Настройки
 - Что будет, если положить lab.yml в group_vars/all/:
