@@ -28,7 +28,7 @@ v2.31.0
 ansible [core 2.18.20]
 ## Шаг 5. Инвентарь
 [kube_control_plane]
-blank-black2 ansible_host=82.148.225.27(адрес ноды) ip=10.0.0.1(внутренний bind) ansible_user=kostya  ansible_ssh_private_key_file=~/.ssh/kubespray etcd_member_name=etcd1
+blank-black2 ansible_host=82.148.225.27(адрес ноды) ip=82.148.225.27(внутренний bind) ansible_user=kostya  ansible_ssh_private_key_file=~/.ssh/kubespray etcd_member_name=etcd1
 
 [etcd:children]
 kube_control_plane
@@ -146,8 +146,13 @@ Swap:             0B          0B          0B
 
 ## Шаг 9. Запуск
 - PLAY RECAP:
+PLAY RECAP *********************************************************************
+blank-black2               : ok=648  changed=136  unreachable=0    failed=0    skipped=875  rescued=0    ignored=4   
+
 - Время установки:
+9.13
 - Падения и что сделал:
+Bind IP -> 10.0.0.1 -> 82.148.225.27
 ## Шаг 10. kubectl под своим пользователем
 ## Шаг 11. Проверки
 ### 11.1 ... 11.10
