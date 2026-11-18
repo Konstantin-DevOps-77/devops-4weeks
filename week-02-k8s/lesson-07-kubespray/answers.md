@@ -40,8 +40,77 @@ blank-black2
 kube_control_plane
 kube_node
 
+#Проверки
+(kubespray-venv) kostya@blank-black:~/kubespray$ ansible-inventory -i inventory/mycluster/inventory.ini --graph
+@all:
+  |--@ungrouped:
+  |--@etcd:
+  |  |--@kube_control_plane:
+  |  |  |--blank-black2
+  |--@k8s_cluster:
+  |  |--@kube_control_plane:
+  |  |  |--blank-black2
+  |  |--@kube_node:
+  |  |  |--blank-black2
+(kubespray-venv) kostya@blank-black:~/kubespray$ ansible -i inventory/mycluster/inventory.ini all -m ping
+[WARNING]: Platform linux on host blank-black2 is using the discovered Python interpreter at /usr/bin/python3.12, but future installation of another Python interpreter could
+change the meaning of that path. See https://docs.ansible.com/ansible-core/2.18/reference_appendices/interpreter_discovery.html for more information.
+blank-black2 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.12"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
 ## Шаг 6. Настройки
+
+# Мои настройки учебного кластера
+
+# Не трогать DNS самого сервера: если DNS кластера сломается,
+# сервер (и VPN) продолжат резолвить имена как раньше
+resolvconf_mode: none
+
+# Дополнения
+helm_enabled: true                     # helm на ноде, понадобится в следующих уроках
+metrics_server_enabled: true           # чтобы работал kubectl top
+local_path_provisioner_enabled: true   # тома (PVC) на локальном диске ноды
+
+
+(kubespray-venv) kostya@blank-black:~/kubespray$ ansible-inventory -i inventory/mycluster/inventory.ini --host blank-black2   | grep -E '"(resolvconf_mode|helm_enabled|metrics_server_enabled|local_path_provisioner_enabled|kube_network_plugin|kube_proxy_mode|kube_pods_subnet|kube_service_addresses|container_manager)"'
+    "container_manager": "containerd",
+    "helm_enabled": true,
+    "kube_network_plugin": "calico",
+    "kube_pods_subnet": "10.233.64.0/18",
+    "kube_proxy_mode": "ipvs",
+    "kube_service_addresses": "10.233.0.0/18",
+    "local_path_provisioner_enabled": true,
+    "metrics_server_enabled": true,
+    "resolvconf_mode": "none",
 - Что будет, если положить lab.yml в group_vars/all/:
+(kubespray-venv) kostya@blank-black:~/kubespray/inventory/mycluster/group_vars$ ls -l all/lab.yml
+-rw-rw-r-- 1 kostya kostya 605 Nov 18 13:44 all/lab.yml
+(kubespray-venv) kostya@blank-black:~/kubespray/inventory/mycluster/group_vars$ ansible-inventory -i inventory/mycluster/inventory.ini --host blank-black2   | grep -E '"(resolvconf_mode|helm_enabled|metrics_server_enabled|local_path_provisioner_enabled|kube_network_plugin|kube_proxy_mode|kube_pods_subnet|kube_service_addresses|container_manager)"'
+[WARNING]: Unable to parse /home/kostya/kubespray/inventory/mycluster/group_var
+s/inventory/mycluster/inventory.ini as an inventory source
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: Could not match supplied host pattern, ignoring: blank-black2
+ERROR! You must pass a single valid host to --host parameter
+
+kubespray-venv) kostya@blank-black:~/kubespray$ ansible-inventory -i inventory/mycluster/inventory.ini --host blank-black2 \
+  | grep -E '"(resolvconf_mode|helm_enabled|metrics_server_enabled|local_path_provisioner_enabled|kube_network_plugin|kube_proxy_mode|kube_pods_subnet|kube_service_addresses|co
+ntainer_manager)"'
+    "container_manager": "containerd",
+    "helm_enabled": true,
+    "kube_network_plugin": "calico",
+    "kube_pods_subnet": "10.233.64.0/18",
+    "kube_proxy_mode": "ipvs",
+    "kube_service_addresses": "10.233.0.0/18",
+    "local_path_provisioner_enabled": true,
+    "metrics_server_enabled": true,
+    "resolvconf_mode": "none",
+(kubespray-venv) kostya@blank-black:~/kubespray$ 
+
 ## Шаг 7. Фаервол
 ## Шаг 8. Снимок «до»
 ## Шаг 9. Запуск
