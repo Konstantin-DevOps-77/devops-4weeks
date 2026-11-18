@@ -27,6 +27,19 @@ v2.31.0
 (kubespray-venv) kostya@blank-black:~/kubespray$ ansible --version | head -1
 ansible [core 2.18.20]
 ## Шаг 5. Инвентарь
+[kube_control_plane]
+blank-black2 ansible_host=82.148.225.27(адрес ноды) ip=10.0.0.1(внутренний bind) ansible_user=kostya  ansible_ssh_private_key_file=~/.ssh/kubespray etcd_member_name=etcd1
+
+[etcd:children]
+kube_control_plane
+
+[kube_node]
+blank-black2
+
+[k8s_cluster:children]
+kube_control_plane
+kube_node
+
 ## Шаг 6. Настройки
 - Что будет, если положить lab.yml в group_vars/all/:
 ## Шаг 7. Фаервол
