@@ -112,7 +112,38 @@ ntainer_manager)"'
 (kubespray-venv) kostya@blank-black:~/kubespray$ 
 
 ## Шаг 7. Фаервол
+kostya@blank-black2:~$ sudo ufw status numbered | tee ~/ufw-before-k8s.txt
+[sudo] password for kostya: 
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere                  
+[ 2] 22/tcp (v6)                ALLOW IN    Anywhere (v6)  
+
+kostya@blank-black2:~$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere                  
+[ 2] Anywhere                   ALLOW IN    10.233.64.0/18             # k8s pods
+[ 3] Anywhere                   ALLOW IN    10.233.0.0/18              # k8s services
+[ 4] Anywhere                   ALLOW FWD   10.233.64.0/18             # k8s pods routed
+[ 5] 10.233.64.0/18             ALLOW FWD   Anywhere                   # k8s pods routed
+[ 6] 22/tcp (v6)                ALLOW IN    Anywhere (v6)   
+
 ## Шаг 8. Снимок «до»
+kostya@blank-black2:~/k8s-before$ nano iptables-lines.txt
+109 
+
+kostya@blank-black2:~/k8s-before$ nano free.txt
+  GNU nano 7.2                                                                        free.txt                                                                                  
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       872Mi       2.7Gi       2.2Mi       499Mi       3.0Gi
+Swap:             0B          0B          0B
+
+
 ## Шаг 9. Запуск
 - PLAY RECAP:
 - Время установки:
