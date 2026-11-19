@@ -286,6 +286,101 @@ kube-system          nodelocaldns-w8kv5                         1/1     Running 
 local-path-storage   local-path-provisioner-cdf455b97-8qbqw     1/1     Running   0          17h
 
 
+kostya@blank-black2:~$ kubectl get pods -n kube-system -o wide
+NAME                                       READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+calico-kube-controllers-7c99df9fc4-rgjlk   1/1     Running   0          17h   10.233.104.129   blank-black2   <none>           <none>
+calico-node-x2p6d                          1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+coredns-58cc5d8ddf-t4d6l                   1/1     Running   0          17h   10.233.104.131   blank-black2   <none>           <none>
+dns-autoscaler-7ccf68df7c-8bqtz            1/1     Running   0          17h   10.233.104.132   blank-black2   <none>           <none>
+kube-apiserver-blank-black2                1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-controller-manager-blank-black2       1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-proxy-vhlxv                           1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-scheduler-blank-black2                1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+metrics-server-7d5f87b57f-vzvp9            1/1     Running   0          17h   10.233.104.133   blank-black2   <none>           <none>
+nodelocaldns-w8kv5                         1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+
+kostya@blank-black2:~$ kubectl get namespaces #all namespaces
+NAME                 STATUS   AGE
+default              Active   17h
+kube-node-lease      Active   17h
+kube-public          Active   17h
+kube-system          Active   17h
+local-path-storage   Active   17h
+
+11.5 DNS внутри кластера
+
+ kubectl run dnstest --rm -it --image=busybox:1.36 --restart=Never -- \
+  sh -c 'nslookup kubernetes.default.svc.cluster.local; nslookup github.com'
+Server:         169.254.25.10
+Address:        169.254.25.10:53
+
+
+Name:   kubernetes.default.svc.cluster.local
+Address: 10.233.0.1 # Kubernetes API
+
+Server:         169.254.25.10 # DNS кэш на узле
+Address:        169.254.25.10:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+Name:   github.com
+Address: 140.82.121.3
+
+kostya@blank-black2:~$ kubectl get daemonsets -n kube-system
+NAME           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+calico-node    1         1         1       1            1           kubernetes.io/os=linux   18h
+kube-proxy     1         1         1       1            1           kubernetes.io/os=linux   18h
+nodelocaldns   1         1         1       1            1           kubernetes.io/os=linux   18h
+
+
+11.6. Приложение  
+ kubectl create deployment hello --image=nginx:1.27-alpine --replicas=2
+kubectl expose deployment hello --port=80
+kubectl get pods -l app=hello -o wide
+kubectl get svc hello
+curl -s http://$(kubectl get svc hello -o jsonpath='{.spec.clusterIP}') | head -4
+deployment.apps/hello created
+service/hello exposed
+NAME                     READY   STATUS              RESTARTS   AGE   IP       NODE           NOMINATED NODE   READINESS GATES
+hello-78bbf8c4f9-2jcdp   0/1     ContainerCreating   0          0s    <none>   blank-black2   <none>           <none>
+hello-78bbf8c4f9-7bk7c   0/1     ContainerCreating   0          0s    <none>   blank-black2   <none>           <none>
+NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+hello   ClusterIP   10.233.46.163   <none>        80/TCP    0s
+Какие IP у подов и у сервиса? Из каких они подсетей (Часть 4 README)? Удали под командой kubectl delete pod <имя одного из подов> и сразу kubectl get pods -l app=hello. Что произошло и какой компонент это сделал?С
+ 
+
+
+kostya@blank-black2:~$ kubectl get svc -o wide
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE     SELECTOR
+hello        ClusterIP   10.233.46.163   <none>        80/TCP    2m16s   app=hello  #сервис
+kubernetes   ClusterIP   10.233.0.1      <none>        443/TCP   18h     <none>
+kostya@blank-black2:~$ kubectl get pods -l app=hello -o wide
+NAME                     READY   STATUS    RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+hello-78bbf8c4f9-2jcdp   1/1     Running   0          2m41s   10.233.104.136   blank-black2   <none>           <none>  #под
+hello-78bbf8c4f9-7bk7c   1/1     Running   0          2m41s   10.233.104.135   blank-black2   <none>           <none>  #под
+
+
+kostya@blank-black2:~$ kubectl get pods -l app=hello -o wide
+NAME                     READY   STATUS    RESTARTS   AGE     IP               NODE           NOMINATED NODE   READINESS GATES
+hello-78bbf8c4f9-2jcdp   1/1     Running   0          2m41s   10.233.104.136   blank-black2   <none>           <none>
+hello-78bbf8c4f9-7bk7c   1/1     Running   0          2m41s   10.233.104.135   blank-black2   <none>           <none>
+kostya@blank-black2:~$ kubectl delete pod hello-78bbf8c4f9-2jcdp
+pod "hello-78bbf8c4f9-2jcdp" deleted from default namespace
+
+kostya@blank-black2:~$ kubectl get pods -l app=hello
+NAME                     READY   STATUS    RESTARTS   AGE
+hello-78bbf8c4f9-7bk7c   1/1     Running   0          7m51s
+hello-78bbf8c4f9-q2w8d   1/1     Running   0          89s
+
+
+## Добавился еще один под(вместо удаленного), за создание новых под отвечает kube kontroller
+ReplicaSet Controller - фактически создает ноду через kube-controller-manager 
+scheduler - назначает новый под узлу
+kubelet - запускает контейнер
+
+
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
