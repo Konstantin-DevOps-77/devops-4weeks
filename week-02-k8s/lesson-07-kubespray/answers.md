@@ -379,7 +379,24 @@ ReplicaSet Controller - фактически создает ноду через 
 scheduler - назначает новый под узлу
 kubelet - запускает контейнер
 
+11.7 - Метрики
+kubectl top nodes
+kubectl top pods -A --sort-by=memory | head
 
+kostya@blank-black2:~$ kubectl top nodes
+kubectl top pods -A --sort-by=memory | head
+NAME           CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+blank-black2   145m         10%      2252Mi          73%          
+NAMESPACE            NAME                                       CPU(cores)   MEMORY(bytes)   
+kube-system          kube-apiserver-blank-black2                37m          320Mi           
+kube-system          calico-node-x2p6d                          27m          146Mi           
+kube-system          metrics-server-7d5f87b57f-vzvp9            3m           71Mi            
+kube-system          kube-controller-manager-blank-black2       13m          67Mi            
+kube-system          coredns-58cc5d8ddf-t4d6l                   2m           43Mi            
+kube-system          nodelocaldns-w8kv5                         2m           38Mi            
+kube-system          kube-scheduler-blank-black2                7m           37Mi            
+kube-system          kube-proxy-vhlxv                           5m           30Mi            
+kube-system          calico-kube-controllers-7c99df9fc4-rgjlk   5m           30Mi    
 
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
