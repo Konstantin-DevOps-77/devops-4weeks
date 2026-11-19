@@ -233,6 +233,59 @@ containerd              |     systemd       |      Active (running)
 etcd                    |     systemd       |      Active (running)
 
 
+11.3 etcd
+kostya@blank-black2:~$ sudo ETCDCTL_API=3 etcdctl   --cacert=/etc/ssl/etcd/ssl/ca.pem   --cert=/etc/ssl/etcd/ssl/admin-$(hostname).pem   --key=/etc/ssl/etcd/ssl/admin-$(hostname)-key.pem   --endpoints=https://127.0.0.1:2379   endpoint health -w table
+{"level":"warn","ts":"2026-11-19T08:26:37.491506Z","caller":"flags/flag.go:94","msg":"unrecognized environment variable","environment-variable":"ETCDCTL_API=3"}
++------------------------+--------+------------+-------+
+|        ENDPOINT        | HEALTH |    TOOK    | ERROR |
++------------------------+--------+------------+-------+
+| https://127.0.0.1:2379 |   true | 8.666881ms |       |
++------------------------+--------+------------+-------+
+
+#Без сертификатов.
+kostya@blank-black2:~$ sudo ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379   endpoint health -w table
+{"level":"warn","ts":"2026-11-19T08:28:48.505746Z","caller":"flags/flag.go:94","msg":"unrecognized environment variable","environment-variable":"ETCDCTL_API=3"}
+{"level":"warn","ts":"2026-11-19T08:28:53.507815Z","logger":"client","caller":"v3@v3.6.10/retry_interceptor.go:68","msg":"retrying of unary invoker failed","target":"etcd-endpoints://0xc00029a5a0/127.0.0.1:2379","peer":"Peer{Addr: <nil>, LocalAddr: <nil>, AuthInfo: <nil>}","method":"/etcdserverpb.KV/Range","attempt":0,"error":"rpc error: code = DeadlineExceeded desc = latest balancer error: connection error: desc = \"error reading server preface: remote error: tls: certificate required\""}
++------------------------+--------+--------------+---------------------------+
+|        ENDPOINT        | HEALTH |     TOOK     |           ERROR           |
++------------------------+--------+--------------+---------------------------+
+| https://127.0.0.1:2379 |  false | 5.001841462s | context deadline exceeded |
+
+healthcheck не проходит.  
+
+
+kostya@blank-black2:~$ sudo crictl ps | head
+CONTAINER           IMAGE               CREATED             STATE               NAME                      ATTEMPT             POD ID              POD                                        NAMESPACE
+b229bfd6c1081       e76b3f3568b7f       18 hours ago        Running             metrics-server            0                   81f0338c037ab       metrics-server-7d5f87b57f-vzvp9            kube-system
+109c5f956ffaf       12a9bdcb186d1       18 hours ago        Running             node-cache                0                   b823688646864       nodelocaldns-w8kv5                         kube-system
+941b8085831f7       b6d1a4be0743f       18 hours ago        Running             autoscaler                0                   3b7e24694b802       dns-autoscaler-7ccf68df7c-8bqtz            kube-system
+ad63545b0f51b       17b9ebd6161fd       18 hours ago        Running             coredns                   0                   731e8f8f1561c       coredns-58cc5d8ddf-t4d6l                   kube-system
+d333021ee584a       cb584e17a5f4b       18 hours ago        Running             local-path-provisioner    0                   9bfc89f32acd1       local-path-provisioner-cdf455b97-8qbqw     local-path-storage
+13a0a00548490       d686db0e796da       18 hours ago        Running             calico-kube-controllers   0                   a6b71edc6ed6c       calico-kube-controllers-7c99df9fc4-rgjlk   kube-system
+91babe050419c       cfa3bb2488693       18 hours ago        Running             calico-node               0                   eab41a6d34369       calico-node-x2p6d                          kube-system
+f44319e9e25d3       f21f27cddb23d       18 hours ago        Running             kube-proxy                0                   a9940b759f6c6       kube-proxy-vhlxv                           kube-system
+eed0ec12dfe63       a0eecd9b69a38       18 hours ago        Running             kube-scheduler            0                   7ce063f1b5783       kube-scheduler-blank-black2                kube-system
+
+kostya@blank-black2:~$ kubectl get pods
+No resources found in default namespace.
+
+В окружении по умолчании нет узлов. Все узлы содержатся в namespace - kube-system + local-path-storage  
+
+kostya@blank-black2:~$ kubectl get pods -A
+NAMESPACE            NAME                                       READY   STATUS    RESTARTS   AGE
+kube-system          calico-kube-controllers-7c99df9fc4-rgjlk   1/1     Running   0          17h
+kube-system          calico-node-x2p6d                          1/1     Running   0          17h
+kube-system          coredns-58cc5d8ddf-t4d6l                   1/1     Running   0          17h
+kube-system          dns-autoscaler-7ccf68df7c-8bqtz            1/1     Running   0          17h
+kube-system          kube-apiserver-blank-black2                1/1     Running   0          17h
+kube-system          kube-controller-manager-blank-black2       1/1     Running   0          17h
+kube-system          kube-proxy-vhlxv                           1/1     Running   0          17h
+kube-system          kube-scheduler-blank-black2                1/1     Running   0          17h
+kube-system          metrics-server-7d5f87b57f-vzvp9            1/1     Running   0          17h
+kube-system          nodelocaldns-w8kv5                         1/1     Running   0          17h
+local-path-storage   local-path-provisioner-cdf455b97-8qbqw     1/1     Running   0          17h
+
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
