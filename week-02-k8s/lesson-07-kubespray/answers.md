@@ -163,7 +163,17 @@ E1118 14:41:40.688526   22149 memcache.go:265] "Unhandled Error" err="couldn't g
 E1118 14:41:40.688887   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
 E1118 14:41:40.690585   22149 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
 The connection to the server localhost:8080 was refused - did you specify the right host or port?
+
+kubectl get nodes -o wide
+NAME           STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+blank-black2   Ready    control-plane   17h   v1.35.4   82.148.225.27   <none>        Ubuntu 24.04.5 LTS   6.8.0-149-generic   containerd://2.2.3
+
+kostya@blank-black2:~$ ls -l ~/.kube/config
+-rw------- 1 kostya kostya 5653 Nov 18 14:43 /home/kostya/.kube/config
+
+
 ## Шаг 11. Проверки
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
