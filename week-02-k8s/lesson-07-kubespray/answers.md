@@ -173,6 +173,65 @@ kostya@blank-black2:~$ ls -l ~/.kube/config
 
 
 ## Шаг 11. Проверки
+1.1 
+kostya@blank-black2:~$ kubectl get pods -A -o wide
+NAMESPACE            NAME                                       READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+kube-system          calico-kube-controllers-7c99df9fc4-rgjlk   1/1     Running   0          17h   10.233.104.129   blank-black2   <none>           <none>
+kube-system          calico-node-x2p6d                          1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-system          coredns-58cc5d8ddf-t4d6l                   1/1     Running   0          17h   10.233.104.131   blank-black2   <none>           <none>
+kube-system          dns-autoscaler-7ccf68df7c-8bqtz            1/1     Running   0          17h   10.233.104.132   blank-black2   <none>           <none>
+kube-system          kube-apiserver-blank-black2                1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-system          kube-controller-manager-blank-black2       1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-system          kube-proxy-vhlxv                           1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-system          kube-scheduler-blank-black2                1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+kube-system          metrics-server-7d5f87b57f-vzvp9            1/1     Running   0          17h   10.233.104.133   blank-black2   <none>           <none>
+kube-system          nodelocaldns-w8kv5                         1/1     Running   0          17h   82.148.225.27    blank-black2   <none>           <none>
+local-path-storage   local-path-provisioner-cdf455b97-8qbqw     1/1     Running   0          17h   10.233.104.130   blank-black2   <none>           <none>
+
+1.2 
+ostya@blank-black2:~$ ls -l /etc/kubernetes/manifests/
+systemctl status kubelet containerd etcd --no-pager | grep -E '●|Active'
+total 16
+-rw------- 1 root root 4621 Nov 18 14:35 kube-apiserver.yaml
+-rw------- 1 root root 3663 Nov 18 14:35 kube-controller-manager.yaml
+-rw------- 1 root root 1957 Nov 18 14:35 kube-scheduler.yaml
+● kubelet.service - Kubernetes Kubelet Server
+     Active: active (running) since Wed 2026-11-18 14:35:53 UTC; 17h ago
+● containerd.service - containerd container runtime
+     Active: active (running) since Wed 2026-11-18 14:30:36 UTC; 17h ago
+● etcd.service - etcd
+     Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
+
+Первые три строки сверху - static pod(список по манифесту), три снизу - systemd(за) 
+
+kostya@blank-black2:~$ ls -l /etc/kubernetes/manifests/
+systemctl status kubelet containerd etcd --no-pager | grep -E '●|Active'
+total 16
+-rw------- 1 root root 4621 Nov 18 14:35 kube-apiserver.yaml
+-rw------- 1 root root 3663 Nov 18 14:35 kube-controller-manager.yaml
+-rw------- 1 root root 1957 Nov 18 14:35 kube-scheduler.yaml
+● kubelet.service - Kubernetes Kubelet Server
+     Active: active (running) since Wed 2026-11-18 14:35:53 UTC; 17h ago
+● containerd.service - containerd container runtime
+     Active: active (running) since Wed 2026-11-18 14:30:36 UTC; 17h ago
+● etcd.service - etcd
+     Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
+kostya@blank-black2:~$ systemctl status kubelet containerd etcd --no-pager | grep -E '●|Active'
+● kubelet.service - Kubernetes Kubelet Server
+     Active: active (running) since Wed 2026-11-18 14:35:53 UTC; 17h ago
+● containerd.service - containerd container runtime
+     Active: active (running) since Wed 2026-11-18 14:30:36 UTC; 17h ago
+● etcd.service - etcd
+     Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
+
+Компонент               |    Тип запуска    |     Состояние
+kube-apiserver          |     Static Pod    |     Манифест найден
+kube-controller-manager |     Static Pod    |     Манифест найден
+kube-scheduler          |     Static Pod    |     Манифест найден
+kubelet                 |     systemd       |      Active (running)
+containerd              |     systemd       |      Active (running)
+etcd                    |     systemd       |      Active (running)
+
 
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
