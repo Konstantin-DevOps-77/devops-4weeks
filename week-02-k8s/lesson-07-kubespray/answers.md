@@ -508,6 +508,70 @@ hello-from-pod
 Если нода временно выключится, данные будут недоступны до её возвращения.
 Если диск ноды потерян, данные пропадут без резервнойц копии, local-path хранит их только на одной ноде.
 
+11.9  
+kostya@blank-black2:~$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       1.7Gi       316Mi       4.8Mi       2.1Gi       2.1Gi
+Swap:             0B          0B          0B
+kostya@blank-black2:~$ sudo iptables-save | wc -l
+561
+kostya@blank-black2:~$ diff ~/k8s-before/hosts.txt /etc/hosts
+2c2
+< 127.0.1.1 ubuntu24
+---
+> 127.0.1.1 blank-black2.ptr.network blank-black2 ubuntu24
+kostya@blank-black2:~$ diff ~/k8s-before/resolv.txt /etc/resolv.conf
+kostya@blank-black2:~$ swapon --show
+kostya@blank-black2:~$ systemctl list-units --type=service --state=running --no-legend | awk '{print $1}' |
+> ^C
+kostya@blank-black2:~$ diff ~/k8s-before/services.txt -
+^C
+kostya@blank-black2:~$ systemctl list-units --type=service --state=running --no-legend | awk '{print $1}' |
+> diff ~/k8s-before/services.txt -
+0a1
+> containerd.service
+2a4
+> etcd.service
+4a7
+> kubelet.service
+
+# Сравнение с до:  
+kostya@blank-black2:~/k8s-before$ nano iptables-lines.txt
+109 
+
+kostya@blank-black2:~/k8s-before$ nano free.txt
+  GNU nano 7.2                                                                        free.txt                                                                                  
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       872Mi       2.7Gi       2.2Mi       499Mi       3.0Gi
+Swap:             0B          0B          0B
+
+#Почти в 5 раз выросло число iptables(включает служебные строки дампа -> используется cache), сильно изменилась занимаемая память - уменьшилась в 2 раза
+> diff ~/k8s-before/services.txt -
+0a1
+> containerd.service
+2a4
+> etcd.service
+4a7
+> kubelet.service
+
+Добавились новые службы (containerd/etcd/kubelet).service
+Поменялись ли /etc/hosts и resolv.conf? - Не поменялись
+
+
+# Шаг 12.
+
+```shell
+kubectl get podes
+```
+
+```shell
+
+NAME           STATUS   ROLES           AGE   VERSION
+blank-black2   Ready    control-plane   45h   v1.35.4
+
+```
+почему это безопаснее, чем открыть 6443 в ufw?
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
