@@ -1,0 +1,4 @@
+inventory/artifacts/
+inventory/credentials/
+*.conf
+*kubeconfig*
