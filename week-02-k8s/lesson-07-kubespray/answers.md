@@ -112,12 +112,13 @@ Anywhere                   ALLOW FWD   10.233.64.0/18             # k8s pods rou
 kostya@blank-black2:~$ sudo sshd -T | grep -E 'permitrootlogin|passwordauthentication'
 permitrootlogin no
 passwordauthentication no
-```
-Выбрано создание нового сервера.
-## Шаг 2. Ключ для Ansible
+```  
+## Шаг 2. Ключ для Ansible  
+```bash
 kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname; whoami'
 blank-black2.ptr.network
 kostya
+```  
 ## Шаг 3. Имя ноды
 #Терминал А(Ansible)  
 kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ `ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname -s'`
