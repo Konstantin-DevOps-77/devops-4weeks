@@ -458,6 +458,8 @@ kube-system          kube-scheduler-blank-black2                7m           37M
 kube-system          kube-proxy-vhlxv                           5m           30Mi            
 kube-system          calico-kube-controllers-7c99df9fc4-rgjlk   5m           30Mi    
 
+#Самый  "тяжелый" - APIserver -> почти в 2 раза превосходит calico(второго по "тяжести")  
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
