@@ -1,0 +1,10 @@
+# Мои настройки учебного кластера
+
+# Не трогать DNS самого сервера: если DNS кластера сломается,
+# сервер (и VPN) продолжат резолвить имена как раньше
+resolvconf_mode: none
+
+# Дополнения
+helm_enabled: true                     # helm на ноде, понадобится в следующих уроках
+metrics_server_enabled: true           # чтобы работал kubectl top
+local_path_provisioner_enabled: true   # тома (PVC) на локальном диске ноды
