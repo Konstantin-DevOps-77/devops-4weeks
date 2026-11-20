@@ -871,4 +871,5 @@ A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/offline.yml
 ```
 
 ## Что было непонятно
+1. 
 
