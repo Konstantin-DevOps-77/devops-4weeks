@@ -845,6 +845,30 @@ kostya@blank-black2:~$
 Сопоставлять адреса selector с pod labels и проверять HTTP из другого пода после выкладки.
 
 ## Шаг 15. Git
+```bash
+root@blank-black:~/projects/devops-4weeks# git grep --cached -IlE '^[[:space:]]*("?(client-key-data|client-certificate-data|certificate-authority-data)"?[[:space:]]*:|-----BEGIN ([A-Z0-9 ]*PRIVATE KEY|CERTIFICATE)-----)' -- "$LESSON"
+root@blank-black:~/projects/devops-4weeks# printf 'Код проверки: %s\n' "$?"
+Код проверки: 1
+root@blank-black:~/projects/devops-4weeks# git status
+commit c604c018302f18203f8e8512e0b48dc1cfa6711c (HEAD -> main, origin/main, origin/HEAD)
+Author: Konstantin-DevOps-77 <racer2000@yandex.ru>
+
+    Добавили и проверили инвентарь
+
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/all.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/aws.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/azure.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/containerd.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/coreos.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/cri-o.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/docker.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/etcd.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/gcp.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/hcloud.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/huaweicloud.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/oci.yml
+A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/offline.yml
+```
 
 ## Что было непонятно
 
