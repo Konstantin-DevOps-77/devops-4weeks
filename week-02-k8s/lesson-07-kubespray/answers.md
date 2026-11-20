@@ -460,6 +460,54 @@ kube-system          calico-kube-controllers-7c99df9fc4-rgjlk   5m           30M
 
 #Самый  "тяжелый" - APIserver -> почти в 2 раза превосходит calico(второго по "тяжести")  
 
+11.8 
+kostya@blank-black2:~$ kubectl get storageclass
+NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  45h
+kostya@blank-black2:~$ kubectl apply -f - <<'EOF'
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-writer
+spec:
+  containers:
+    - name: writer
+      image: busybox:1.36
+      command: ["sh", "-c", "echo hello-from-pod > /data/hello.txt && sleep 3600"]
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: test-pvc
+EOF
+persistentvolumeclaim/test-pvc created
+pod/test-writer created
+kostya@blank-black2:~$ kubectl get pvc test-pvc
+NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+test-pvc   Bound    pvc-f205461b-2a7a-4bbc-b9c1-d0607c9bf8e2   100Mi      RWO            local-path     <unset>                 21s
+kostya@blank-black2:~$ sudo find /opt/local-path-provisioner -name hello.txt -exec cat {} \;
+[sudo] password for kostya: 
+hello-from-pod
+
+#Данные pod лежат физически на нашей VPS(терминал B), в каталоге тома под /opt/local-path-provisioner/.   
+Статус Bound означает, что PVC привязан к этому тому.
+
+Если под пересоздать на той же ноде, файл сохранится.
+Если нода временно выключится, данные будут недоступны до её возвращения.
+Если диск ноды потерян, данные пропадут без резервнойц копии, local-path хранит их только на одной ноде.
+
 ### 11.1 ... 11.10
 ## Шаг 12. Доступ с Windows (если делал)
 ## Шаг 13. NodePort снаружи
