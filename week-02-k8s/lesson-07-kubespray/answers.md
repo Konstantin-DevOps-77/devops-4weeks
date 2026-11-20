@@ -309,35 +309,15 @@ total 16
 ● etcd.service - etcd
      Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
 
-Первые три строки сверху - static pod(список по манифесту), три снизу - systemd(за) 
 
-kostya@blank-black2:~$ ls -l /etc/kubernetes/manifests/
-systemctl status kubelet containerd etcd --no-pager | grep -E '●|Active'
-total 16
--rw------- 1 root root 4621 Nov 18 14:35 kube-apiserver.yaml
--rw------- 1 root root 3663 Nov 18 14:35 kube-controller-manager.yaml
--rw------- 1 root root 1957 Nov 18 14:35 kube-scheduler.yaml
-● kubelet.service - Kubernetes Kubelet Server
-     Active: active (running) since Wed 2026-11-18 14:35:53 UTC; 17h ago
-● containerd.service - containerd container runtime
-     Active: active (running) since Wed 2026-11-18 14:30:36 UTC; 17h ago
-● etcd.service - etcd
-     Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
-kostya@blank-black2:~$ systemctl status kubelet containerd etcd --no-pager | grep -E '●|Active'
-● kubelet.service - Kubernetes Kubelet Server
-     Active: active (running) since Wed 2026-11-18 14:35:53 UTC; 17h ago
-● containerd.service - containerd container runtime
-     Active: active (running) since Wed 2026-11-18 14:30:36 UTC; 17h ago
-● etcd.service - etcd
-     Active: active (running) since Wed 2026-11-18 14:35:03 UTC; 17h ago
-
-Компонент               |    Тип запуска    |     Состояние
-kube-apiserver          |     Static Pod    |     Манифест найден
-kube-controller-manager |     Static Pod    |     Манифест найден
-kube-scheduler          |     Static Pod    |     Манифест найден
-kubelet                 |     systemd       |      Active (running)
-containerd              |     systemd       |      Active (running)
-etcd                    |     systemd       |      Active (running)
+|   Компонент              |    Тип запуска    |     Состояние         |
+| ------------------------ | ----------------- | --------------------- |                      
+|  kube-apiserver          |     Static Pod    |     Манифест найден   |
+|  kube-controller-manager |     Static Pod    |     Манифест найден   |
+|  kube-scheduler          |     Static Pod    |     Манифест найден   |
+|  kubelet                 |     systemd       |      Active (running) | 
+|  containerd              |     systemd       |      Active (running) |
+|  etcd                    |     systemd       |      Active (running) |
 
 
 11.3 etcd
@@ -454,8 +434,6 @@ hello-78bbf8c4f9-2jcdp   0/1     ContainerCreating   0          0s    <none>   b
 hello-78bbf8c4f9-7bk7c   0/1     ContainerCreating   0          0s    <none>   blank-black2   <none>           <none>
 NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
 hello   ClusterIP   10.233.46.163   <none>        80/TCP    0s
-Какие IP у подов и у сервиса? Из каких они подсетей (Часть 4 README)? Удали под командой kubectl delete pod <имя одного из подов> и сразу kubectl get pods -l app=hello. Что произошло и какой компонент это сделал?С
- 
 
 
 kostya@blank-black2:~$ kubectl get svc -o wide
@@ -487,8 +465,6 @@ scheduler - назначает новый под узлу
 kubelet - запускает контейнер
 
 11.7 - Метрики
-kubectl top nodes
-kubectl top pods -A --sort-by=memory | head
 
 kostya@blank-black2:~$ kubectl top nodes
 kubectl top pods -A --sort-by=memory | head
@@ -548,12 +524,12 @@ kostya@blank-black2:~$ sudo find /opt/local-path-provisioner -name hello.txt -ex
 [sudo] password for kostya: 
 hello-from-pod
 
-#Данные pod лежат физически на нашей VPS(терминал B), в каталоге тома под /opt/local-path-provisioner/.   
+#Данные pod лежат физически на нашей новой VPS(терминал B), в каталоге тома под /opt/local-path-provisioner/.   
 Статус Bound означает, что PVC привязан к этому тому.
 
 Если под пересоздать на той же ноде, файл сохранится.
 Если нода временно выключится, данные будут недоступны до её возвращения.
-Если диск ноды потерян, данные пропадут без резервнойц копии, local-path хранит их только на одной ноде.
+Если диск ноды потерян, данные пропадут без резервной копии, local-path хранит их только на одной ноде.
 
 11.9  
 kostya@blank-black2:~$ free -h
@@ -787,7 +763,7 @@ nginx:1.27-alpine
 * Имя образа теперь верное, и поэтому при pull image находится
 
 - **Профилактика:**
-Проверять именование и их существование образов в контейнерах.
+Проверять именование образов и их существование в контейнерах.
 
 ### K8S-703  
 - **«API задеплоили, оба пода Running, но другие сервисы не могут к нему достучаться по http://ops703-api.ops7**
