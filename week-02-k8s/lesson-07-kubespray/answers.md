@@ -642,15 +642,108 @@ ops701-report-879f56977-7vbbk   1/1     Running   0          21s   10.233.104.14
 
 * Проверять единицы, фактическое потребление и доступную ёмкость при развёртывании, в соответсвии с ожидаемыми значениями.
 
-### K8S-702  
-- **Симптом:**
 
-- **Влияние:**
+### K8S-702  
+- **Симптом и влияние:**
+У новой версии фронта нет готовой реплики. Основные сообщение находятся в событиях kubelet, потому что контейнер ещё не стартовал.
+
 - **Диагностика:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 get pods -l app=ops702-web -o wide
+NAME                          READY   STATUS             RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+ops702-web-7dc558dcfd-25cml   0/1     ImagePullBackOff   0          13m   10.233.104.141   blank-black2   <none>           <none>
+kostya@blank-black2:~$ kubectl -n ops7 describe pods -l app=ops702-web
+Name:             ops702-web-7dc558dcfd-25cml
+Namespace:        ops7
+Priority:         0
+Service Account:  default
+Node:             blank-black2/82.148.225.27
+Start Time:       Fri, 20 Nov 2026 12:20:30 +0000
+Labels:           app=ops702-web
+                  pod-template-hash=7dc558dcfd
+Annotations:      cni.projectcalico.org/containerID: cabb7aa50b72828e8c7dee8feaad04efce2b8e6bdd0ce97c876c4aac4eaa21fa
+                  cni.projectcalico.org/podIP: 10.233.104.141/32
+                  cni.projectcalico.org/podIPs: 10.233.104.141/32
+Status:           Pending
+IP:               10.233.104.141
+IPs:
+  IP:           10.233.104.141
+Controlled By:  ReplicaSet/ops702-web-7dc558dcfd
+Containers:
+  web:
+    Container ID:   
+    Image:          nginx:1.27-alpinee
+    Image ID:       
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ImagePullBackOff
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-pnhsz (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-pnhsz:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  13m                   default-scheduler  Successfully assigned ops7/ops702-web-7dc558dcfd-25cml to blank-black2
+  Normal   Pulling    10m (x5 over 13m)     kubelet            spec.containers{web}: Pulling image "nginx:1.27-alpinee"
+  Warning  Failed     10m (x5 over 13m)     kubelet            spec.containers{web}: Failed to pull image "nginx:1.27-alpinee": rpc error: code = NotFound desc = get image config descriptor: unexpected media type text/html for sha256:d66d1e14dce1e26b1948b98164d70f90e4e236a75bca2b074e6d5dced62212b7: not found
+  Warning  Failed     10m (x5 over 13m)     kubelet            spec.containers{web}: Error: ErrImagePull
+  Normal   BackOff    3m34s (x42 over 13m)  kubelet            spec.containers{web}: Back-off pulling image "nginx:1.27-alpinee"
+  Warning  Failed     3m21s (x43 over 13m)  kubelet            spec.containers{web}: Error: ImagePullBackOff
+kostya@blank-black2:~$ ubectl -n ops7 get deployment ops702-web \
+  -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+ubectl: command not found
+kostya@blank-black2:~$ kubectl -n ops7 get deployment ops702-web   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+nginx:1.27-alpinee
+```
+
 - **Причина:**
+* nginx:1.27-alpinee - опечатка. Поэтому при Failed to pull image у нас причина что образ не был найден (not found)
+
 - **Решение:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 set image deployment/ops702-web web=nginx:1.27-alpine
+deployment.apps/ops702-web image updated
+kostya@blank-black2:~$ kubectl -n ops7 rollout status deployment/ops702-web --timeout=180s
+deployment "ops702-web" successfully rolled out
+```
+
+* Через kubectl set зададим верное имя образа
+
 - **Проверка:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 get pods -l app=ops702-web -o wide
+NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+ops702-web-867569fd9-bs74r   1/1     Running   0          13s   10.233.104.144   blank-black2   <none>           <none>
+kostya@blank-black2:~$ kubectl -n ops7 get deployment ops702-web \
+  -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+nginx:1.27-alpine
+```
+* Имя образа теперь верное, и поэтому при pull image находится
+
 - **Профилактика:**
+Проверять именование и их существование образов в контейнерах.
+
 ### K8S-703  
 - **Симптом:**
 - **Влияние:**
