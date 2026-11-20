@@ -53,17 +53,17 @@ swapon --show                                  # есть ли swap
 ip -br a                                       # все интерфейсы
 ip r                                           # все маршруты
 
-|              Команда                             | Полученное значение              |          Вывод/решение          |
-| ------------------------------------------       | --------------------             | -----------------------------   |
-|      nproc                                       |        1                         | Недостаточно(нужно минимум 2)   |
-|      free -h                                     | total 1.9Gi, available - 886Mi   | Достаточно для установки        |
-|      df -h /                                     | Size - 30G, Avail - 13G          | Достаточно для установки        |
-| cat /etc/os-release | grep PRETTY_NAME           | PRETTY_NAME="Ubuntu 24.04.5 LTS" | Соответствует требованиям       |
-| systemctl is-active docker containerd            | active active                    | Контейнеризация есть - не Ок    |
-| sudo docker ps --format '{{.Names}}' 2>/dev/null | Пусто                            | Контейнеры не запущены          |
-|      swapon --show                               | Пусто                            | Swap не запущен и/или неактивен |
-|      ip br -a                                    | lo, enp0s3,awg0, docker0         | Присутствует docker - не ок     |
-|      ip -r                                       | default, dev awg0, docker0       | Присутствует docker - не ок     |
+|              Команда                               | Полученное значение              |          Вывод/решение          |
+| ------------------------------------------         | --------------------             | -----------------------------   |
+|      `nproc`                                       |        1                         | Недостаточно(нужно минимум 2)   |
+|      `free -h`                                     | total 1.9Gi, available - 886Mi   | Достаточно для установки        |
+|      `df -h /`                                     | Size - 30G, Avail - 13G          | Достаточно для установки        |
+| `cat /etc/os-release grep PRETTY_NAME`             | PRETTY_NAME="Ubuntu 24.04.5 LTS" | Соответствует требованиям       |
+| `systemctl is-active docker containerd`            | active active                    | Контейнеризация есть - не Ок    |
+| `sudo docker ps --format '{{.Names}}' 2>/dev/null` | Пусто                            | Контейнеры не запущены          |
+|      `swapon --show`                               | Пусто                            | Swap не запущен и/или неактивен |
+|      `ip br -a`                                    | lo, enp0s3,awg0, docker0         | Присутствует docker - не ок     |
+|      `ip -r`                                       | default, dev awg0, docker0       | Присутствует docker - не ок     |
 
 
 
