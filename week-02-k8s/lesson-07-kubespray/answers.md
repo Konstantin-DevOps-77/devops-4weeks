@@ -91,7 +91,8 @@ See https://ubuntu.com/esm or run: sudo pro status
 New release '26.04.1 LTS' available.
 Run 'do-release-upgrade' to upgrade to it.
 Last login: Wed Nov 18 14:48:07 2026 from 79.137.202.82
-```
+```  
+  
 ```bash
 kostya@blank-black2:~$ sudo ufw status
 [sudo] password for kostya: 
@@ -106,13 +107,14 @@ Anywhere                   ALLOW       10.233.0.0/18              # k8s services
 
 Anywhere                   ALLOW FWD   10.233.64.0/18             # k8s pods routed
 10.233.64.0/18             ALLOW FWD   Anywhere                   # k8s pods routed
-```  
-
+```    
+  
 ```bash
 kostya@blank-black2:~$ sudo sshd -T | grep -E 'permitrootlogin|passwordauthentication'
 permitrootlogin no
 passwordauthentication no
 ```  
+  
 ## Шаг 2. Ключ для Ansible  
 ```bash
 kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname; whoami'
