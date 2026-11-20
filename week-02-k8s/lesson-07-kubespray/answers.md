@@ -62,37 +62,40 @@ Kubespray - фактически представляет из себянабо�
 ## Шаг 1. Нода (для варианта А)  
 
 ~~~shell
-PS C:\Users\Admin> ssh kostya@82.148.225.27
-Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-149-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/pro
-
- System information as of Fri Nov 20 01:56:13 PM UTC 2026
-
-  System load:  0.54               Processes:               199
-  Usage of /:   14.5% of 58.96GB   Users logged in:         0
-  Memory usage: 30%                IPv4 address for enp0s3: 82.148.225.27
-  Swap usage:   0%                 IPv6 address for enp0s3: 2a0b:4140:ed96::2
-
- * Canonical Workshop gives developers fast, composable, reproducible, and
-   secure developer environments that are perfect for agentic workflows.
-
-   https://ubuntu.com/workshop
-
-Expanded Security Maintenance for Applications is not enabled.
-
-0 updates can be applied immediately.
-
-Enable ESM Apps to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-New release '26.04.1 LTS' available.
-Run 'do-release-upgrade' to upgrade to it.
-Last login: Wed Nov 18 14:48:07 2026 from 79.137.202.82
-```  
+PS C:\Users\Admin> ssh kostya@82.148.225.27  
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-149-generic x86_64)  
   
+ * Documentation:  https://help.ubuntu.com  
+ * Management:     https://landscape.canonical.com  
+ * Support:        https://ubuntu.com/pro  
+  
+ System information as of Fri Nov 20 01:56:13 PM UTC 2026  
+  
+  System load:  0.54               Processes:               199  
+  Usage of /:   14.5% of 58.96GB   Users logged in:         0  
+  Memory usage: 30%                IPv4 address for enp0s3: 82.148.225.27  
+  Swap usage:   0%                 IPv6 address for enp0s3: 2a0b:4140:ed96::2  
+  
+ * Canonical Workshop gives developers fast, composable, reproducible, and  
+   secure developer environments that are perfect for agentic workflows.  
+  
+   https://ubuntu.com/workshop  
+  
+Expanded Security Maintenance for Applications is not enabled.  
+  
+0 updates can be applied immediately.  
+  
+Enable ESM Apps to receive additional future security updates.  
+See https://ubuntu.com/esm or run: sudo pro status  
+  
+New release '26.04.1 LTS' available.  
+Run 'do-release-upgrade' to upgrade to it.  
+Last login: Wed Nov 18 14:48:07 2026 from 79.137.202.82  
+```  
+
+
+
+
 ```bash
 kostya@blank-black2:~$ sudo ufw status
 [sudo] password for kostya: 
