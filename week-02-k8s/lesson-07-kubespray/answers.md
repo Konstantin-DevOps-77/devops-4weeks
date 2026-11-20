@@ -51,8 +51,8 @@ kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh
 blank-black2.ptr.network
 kostya
 ## Шаг 3. Имя ноды
-#Терминал А(Ansible)
-kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname -s'
+#Терминал А(Ansible)  
+kostya@blank-black:~/projects/devops-4weeks/week-02-k8s/lesson-07-kubespray$ `ssh -i ~/.ssh/kubespray kostya@82.148.225.27 'hostname -s'`
 \blank-black2
 #Терминал B(Управляемая Node kubernetes)
 hostnamectl
