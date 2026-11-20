@@ -853,7 +853,7 @@ root@blank-black:~/projects/devops-4weeks# git status
 commit c604c018302f18203f8e8512e0b48dc1cfa6711c (HEAD -> main, origin/main, origin/HEAD)
 Author: Konstantin-DevOps-77 <racer2000@yandex.ru>
 
-    Добавили и проверили инвентарь
+    Добавили и проверили инвентарь:
 
 A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/all.yml
 A       week-02-k8s/lesson-07-kubespray/inventory/group_vars/all/aws.yml
