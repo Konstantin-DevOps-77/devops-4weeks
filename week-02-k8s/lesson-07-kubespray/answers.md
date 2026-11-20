@@ -656,8 +656,6 @@ curl: (28) Connection timed out after 5010 milliseconds
 
 ## Шаг 14. Тикеты
 ### K8S-701
-- **Не запускается сервис отчетов:**
-- **Нет информации отчеть:**
 - **Симптом:** у Deployment 0/1 готовых реплик, контейнер отчетов не запущен и логов нет
 - **Влияние:** Сервис отчётов недоступен
 - **Диагностика:**
@@ -792,8 +790,7 @@ nginx:1.27-alpine
 Проверять именование и их существование образов в контейнерах.
 
 ### K8S-703  
-- **Симптом:**
-- **Влияние:**
+- **«API задеплоили, оба пода Running, но другие сервисы не могут к нему достучаться по http://ops703-api.ops7**
 - **Диагностика:**
 ```bash
 kostya@blank-black2:~$ kubectl -n ops7 rollout status deployment/ops703-api --timeout=180s
@@ -887,7 +884,6 @@ written to stdout
 pod "curltest" deleted from ops7 namespace
 kostya@blank-black2:~$ 
 ```
-
 - **Профилактика:**
 Сопоставлять адреса selector с pod labels и проверять HTTP из другого пода после выкладки.
 
