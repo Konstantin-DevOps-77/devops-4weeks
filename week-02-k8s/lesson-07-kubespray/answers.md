@@ -609,15 +609,42 @@ curl: (28) Connection timed out after 5010 milliseconds
 
 ## Шаг 14. Тикеты
 ### K8S-701
-- **Симптом:**
-- **Влияние:**
+- **Не запускается сервис отчетов:**
+- **Нет информации отчеть:**
+- **Симптом:** у Deployment 0/1 готовых реплик, контейнер отчетов не запущен и логов нет
+- **Влияние:** Сервис отчётов недоступен
 - **Диагностика:**
-- **Причина:**
+
+65s         Warning   FailedScheduling    pod/ops701-report-668c9c9b4f-xlzm5    0/1 nodes are available: 1 Insufficient memory. no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.
+
+- **Причина:** В запросе указано 64 Gi. Scheduler сранвивает запросы с доступной для планированоия ёмкостью ноды. По условию стенда приложению достаточно 64 Mi
+
 - **Решение:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 set resources deployment/ops701-report -c report --requests=cpu=100m,memory=64Mi
+deployment.apps/ops701-report resource requirements updated
+kostya@blank-black2:~$ kubectl -n ops7 rollout status deployment/ops701-report --timeout=180s
+deployment "ops701-report" successfully rolled out
+```
+*set resources изменил запрос на ожидаемый
+
+
 - **Проверка:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 get pods -l app=ops701-report -o wide
+NAME                            READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES
+ops701-report-879f56977-7vbbk   1/1     Running   0          21s   10.233.104.143   blank-black2   <none>           <none>
+```
+
+* Реплика 1/1 Running
+
 - **Профилактика:**
+
+* Проверять единицы, фактическое потребление и доступную ёмкость при развёртывании, в соответсвии с ожидаемыми значениями.
+
 ### K8S-702  
 - **Симптом:**
+
 - **Влияние:**
 - **Диагностика:**
 - **Причина:**
