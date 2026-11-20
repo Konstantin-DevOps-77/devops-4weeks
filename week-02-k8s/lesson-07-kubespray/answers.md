@@ -558,6 +558,8 @@ Swap:             0B          0B          0B
 Поменялись ли /etc/hosts и resolv.conf? - Не поменялись
 
 
+
+## Шаг 12. Доступ с Windows (если делал)
 # Шаг 12.
 
 ```shell
@@ -571,10 +573,40 @@ blank-black2   Ready    control-plane   45h   v1.35.4
 
 ```
 почему это безопаснее, чем открыть 6443 в ufw?
+За счет того, что на Windows порт 6443 доступен только локально через 127.0.0.1 - нет возможности подключиться снаружи
 
-### 11.1 ... 11.10
-## Шаг 12. Доступ с Windows (если делал)
+Если открыть 6443/tcp в UFW для всех, любый из интернета сможент подключиться к API и отправлять ему запросы - могут Ддосить 
+
 ## Шаг 13. NodePort снаружи
+kostya@blank-black2:~$ kubectl expose deployment hello --name=hello-nodeport --type=NodePort --port=80
+service/hello-nodeport exposed
+kostya@blank-black2:~$ kubectl get svc hello-nodeport
+NAME             TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+hello-nodeport   NodePort   10.233.9.94   <none>        80:31336/TCP   30s
+
+kostya@blank-black2:~$ sudo ufw status
+[sudo] password for kostya: 
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere                  
+Anywhere                   ALLOW       10.233.64.0/18             # k8s pods
+Anywhere                   ALLOW       10.233.0.0/18              # k8s services
+22/tcp (v6)                ALLOW       Anywhere (v6)             
+
+Anywhere                   ALLOW FWD   10.233.64.0/18             # k8s pods routed
+10.233.64.0/18             ALLOW FWD   Anywhere                   # k8s pods routed
+
+#Порта в UFW нет
+PS C:\Users\Admin> curl.exe -sS -i -m 5 "http://82.148.225.27:31336/"
+curl: (28) Connection timed out after 5010 milliseconds
+
+
+Таймаут сам по себе не показывает, где был остановлен трафик, его недостаточно чтобы подтвердить защиту NodePort
+На UFW при защите Node-services полагаться нельзя.
+
+
 ## Шаг 14. Тикеты
 ### K8S-701
 - **Симптом:**
