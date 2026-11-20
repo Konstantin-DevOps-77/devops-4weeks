@@ -748,10 +748,102 @@ nginx:1.27-alpine
 - **Симптом:**
 - **Влияние:**
 - **Диагностика:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 rollout status deployment/ops703-api --timeout=180s
+deployment "ops703-api" successfully rolled out
+kostya@blank-black2:~$ kubectl -n ops7 get pods -l app=ops703-api -o wide --show-labels
+NAME                          READY   STATUS    RESTARTS   AGE   IP               NODE           NOMINATED NODE   READINESS GATES   LABELS
+ops703-api-58c799cfbc-fxhgj   1/1     Running   0          20m   10.233.104.140   blank-black2   <none>           <none>            app=ops703-api,pod-template-hash=58c799cfbc
+ops703-api-58c799cfbc-xcrcb   1/1     Running   0          20m   10.233.104.142   blank-black2   <none>           <none>            app=ops703-api,pod-template-hash=58c799cfbc
+kostya@blank-black2:~$ kubectl -n ops7 describe svc ops703-api
+Name:                     ops703-api
+Namespace:                ops7
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=ops703-backend
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.233.38.196
+IPs:                      10.233.38.196
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+Endpoints:                
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+Events:                   <none>
+kostya@blank-black2:~$ kubectl -n ops7 get endpointslice -l kubernetes.io/service-name=ops703-api -o wide
+NAME               ADDRESSTYPE   PORTS     ENDPOINTS   AGE
+ops703-api-842fp   IPv4          <unset>   <unset>     21m
+kostya@blank-black2:~$ kubectl -n ops7 run curltest --rm -i --image=busybox:1.36 --restart=Never -- \
+  wget -S -O- -T 3 http://ops703-api.ops7
+All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
+If you don't see a command prompt, try pressing enter.
+wget: can't connect to remote host (10.233.38.196): Connection refused
+pod "curltest" deleted from ops7 namespace
+pod ops7/curltest terminated (Error)
+```
+
 - **Причина:**
+* У Service селектор `app=ops703-backend`, у подов метка `app=ops703-api`. В EndpointSlice нет адресов бэкендов.
+
 - **Решение:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 patch service ops703-api --type=merge \
+  -p '{"spec":{"selector":{"app":"ops703-api"}}}'
+service/ops703-api patched
+kostya@blank-black2:~$ kubectl -n ops7 get endpointslice -l kubernetes.io/service-name=ops703-api -o wide
+NAME               ADDRESSTYPE   PORTS   ENDPOINTS                       AGE
+ops703-api-842fp   IPv4          80      10.233.104.142,10.233.104.140   23m
+```
 - **Проверка:**
+```bash
+kostya@blank-black2:~$ kubectl -n ops7 run curltest --rm -i --image=busybox:1.36 --restart=Never -- \
+  wget -S -O- -T 3 http://ops703-api.ops7
+Connecting to ops703-api.ops7 (10.233.38.196:80)
+  HTTP/1.1 200 OK
+  Server: nginx/1.27.5
+  Date: Fri, 20 Nov 2026 12:44:11 GMT
+  Content-Type: text/html
+  Content-Length: 615
+  Last-Modified: Wed, 16 Apr 2025 12:55:34 GMT
+  Connection: close
+  ETag: "67ffa8c6-267"
+  Accept-Ranges: bytes
+  
+writing to stdout
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+-                    100% |********************************|   615  0:00:00 ETA
+written to stdout
+pod "curltest" deleted from ops7 namespace
+kostya@blank-black2:~$ 
+```
+
 - **Профилактика:**
+Сопоставлять адреса selector с pod labels и проверять HTTP из другого пода после выкладки.
+
 ## Шаг 15. Git
 
 ## Что было непонятно
